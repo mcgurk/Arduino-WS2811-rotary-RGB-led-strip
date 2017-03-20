@@ -1,6 +1,6 @@
 -- ws2811.lua
 
-require("hsvtorgb.lua")
+require("hsvtorgb")
 
 PIXELS = 50
 
