@@ -28,7 +28,7 @@ lua: cannot open init.lua
 >
 ```
 
-### Wifi-settings (saved automatically)
+### Wifi-settings (saved automatically to flash)
 ```
 wifi.sta.config("ssid","password")
 ```
