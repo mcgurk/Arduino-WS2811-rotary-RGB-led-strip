@@ -26,6 +26,11 @@ NodeMCU custom build by frightanic.com
 lua: cannot open init.lua
 >
 
+### Wifi-settings (saved automatically)
+```
+wifi.sta.config("ssid","password")
+```
+
 ### Coding
 http://esp8266.ru/esplorer-latest/?f=ESPlorer.zip
 
