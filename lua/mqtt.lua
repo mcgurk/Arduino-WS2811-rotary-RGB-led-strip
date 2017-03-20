@@ -4,7 +4,7 @@ local broker = "xxxx.xxxx.xx"
 local mqttport = 1883
 local userID = "xxxx"
 local userPWD  = "xxxx"
-local clientID = "ESP1"
+local clientID = node.chipid()
 local topic = "ws2811"
 local mqtt_connected = false
 
@@ -21,7 +21,7 @@ local function mqtt_do(callback)
     m:connect(broker , mqttport, 0, 1,
       function(conn)
         print("Connected to MQTT:" .. broker .. ":" .. mqttport .." as " .. clientID )
-        m:publish("status", clientID .. " connected!", 0, 0)
+        m:publish("status", "ESP" .. clientID .. " connected! (flash size: " .. node.flashsize() .. ", heap: " .. node.heap() .. ")", 0, 0)
         tmr.stop(0)
         m:subscribe(topic, 0, 
           function(conn)
