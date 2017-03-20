@@ -56,6 +56,8 @@ print("Blinking")
 
 Send to ESP
 
+### Interrupt init.lua during boot
+https://bigdanzblog.wordpress.com/2015/04/24/esp8266-nodemcu-interrupting-init-lua-during-boot/
 
 ### Send stuff to ESP without Lua-editor (needs Python)
 https://github.com/4refr0nt/luatool
