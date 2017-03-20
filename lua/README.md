@@ -87,13 +87,17 @@ Address is end of flash minus 8192 (0x2000) bytes:
 - 4096kB (0x400000) - 8192B (0x2000) = 4186112B (0x3fe000)
 
 #### Erase Wifi-settings
-Do blank file:
+Do blank file (128 bytes of 0xff):
 ```
 dd if=/dev/zero bs=128 count=1 | tr '\000' '\377' > blank.bin
 ```
 Fill with 0xff (4096kB flash):
 ```
 C:\Users\[user]\AppData\Local\Arduino15\packages\esp8266\tools\esptool\0.4.9\esptool.exe -cp COM15 -cd nodemcu -cb 115200 -ca 0x3fe000 -cf blank.bin
+```
+or with esptool.py:
+```
+esptool.py --port COM15 write_flash 0x3fe000 blank.bin
 ```
 
 ### Misc
