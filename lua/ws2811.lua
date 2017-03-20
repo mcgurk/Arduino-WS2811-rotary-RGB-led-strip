@@ -1,24 +1,36 @@
 -- ws2811.lua
 
-require("hsvtorgb")
+require("hsvToRgb")
 
-PIXELS = 50
+strip = {}
 
+PIXELCOUNT = 50
+
+local buffer = ws2812.newBuffer(PIXELCOUNT, 3)
 local i = 0
-local buffer = ws2812.newBuffer(50, 3)
---buffer:fill(0, 0, 0)
---buffer:set(1, 255, 255, 255)
-function update_ws2811(brightness)
-print("ws2811 update")
-for pixel = 0, PIXELS-1 do
-  buffer:set(pixel+1, hsvToRgb(pixel/PIXELS, 1.0, brightness))
+
+function strip.rainbow(brightness, speed)
+  if not brightness then brightness = 0.5 end
+  if not speed then speed = 100 end
+  for pixel = 0, PIXELCOUNT-1 do
+    buffer:set(pixel+1, hsvToRgb(pixel/PIXELCOUNT, 1.0, brightness))
+  end
+  tmr.alarm(2, speed, 1, function()
+    i = i + 1
+    buffer:shift(1, ws2812.SHIFT_CIRCULAR)
+    ws2812.write(buffer)
+  end)
 end
---buffer:set(1, 255, 0, 0)
-tmr.alarm(2, 100, 1, function()
-  i = i + 1
-  buffer:shift(1, ws2812.SHIFT_CIRCULAR)
+
+function strip.color(r, g, b)
+  buffer:fill(r, g, b)
   ws2812.write(buffer)
-end)
+end
+
+function strip.off()
+  tmr.stop(2)
+  buffer:fill(0, 0, 0)
+  ws2812.write(buffer)
 end
 
 ws2812.init()
