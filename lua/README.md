@@ -78,7 +78,7 @@ pip install esptool
 
 #### Read Wifi-settings
 ```
-esptool.py --port COM15 read_flash 0x7E000 128 wifisettings.bin
+esptool.py --port COM15 read_flash 0x7e000 128 wifisettings.bin
 ```
 Address is end of flash minus 8192 (0x2000) bytes: 
 - 512kB (0x80000) - 8192B (0x2000) = 516096B (0x7e000)
