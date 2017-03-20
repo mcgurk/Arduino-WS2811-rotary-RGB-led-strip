@@ -16,6 +16,7 @@ COM15, nodemcu-master-24-modules-2017-03-15-09-23-08-float.bin, 921600, Dual Fla
 
 ### Start with serial monitor
 Putty, serial, COM15, 115200:
+```
 NodeMCU custom build by frightanic.com
         branch: master
         commit: b96e31477ca1e207aa1c0cdc334539b1f7d3a7f0
@@ -25,6 +26,7 @@ NodeMCU custom build by frightanic.com
  powered by Lua 5.1.4 on SDK 2.0.0(656edbf)
 lua: cannot open init.lua
 >
+```
 
 ### Wifi-settings (saved automatically)
 ```
