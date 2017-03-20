@@ -13,12 +13,16 @@ local function mqtt_do(callback)
   print("mqtt_do")
   if wifi.sta.getip() then
     print('Connected, ip is:' .. wifi.sta.getip())
-    m = mqtt.Client(clientID, 120, userID, userPWD)
+    if not m then 
+      m = mqtt.Client(clientID, 120, userID, userPWD)
+    else
+      m:close()
+    end
     m:connect(broker , mqttport, 0, 1,
       function(conn)
         print("Connected to MQTT:" .. broker .. ":" .. mqttport .." as " .. clientID )
+        m:publish("status", clientID .. " connected!", 0, 0)
         tmr.stop(0)
-        mqtt_connected = true;
         m:subscribe(topic, 0, 
           function(conn)
             print('Subscribed')
