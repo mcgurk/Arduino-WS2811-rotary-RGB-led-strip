@@ -7,7 +7,7 @@ strip = {}
 PIXELCOUNT = 50
 
 local buffer = ws2812.newBuffer(PIXELCOUNT, 3)
-local i = 0
+--local i = 0
 
 function strip.rainbow(brightness, speed)
   if not brightness then brightness = 0.5 end
@@ -16,7 +16,7 @@ function strip.rainbow(brightness, speed)
     buffer:set(pixel+1, hsvToRgb(pixel/PIXELCOUNT, 1.0, brightness))
   end
   tmr.alarm(2, speed, 1, function()
-    i = i + 1
+    --i = i + 1
     buffer:shift(1, ws2812.SHIFT_CIRCULAR)
     ws2812.write(buffer)
   end)
