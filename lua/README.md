@@ -71,14 +71,15 @@ s="hello.lua";file.remove(s);file.open(s,"w+");file.writeline([[print("hello nod
 ```
 
 ### ESP tool (Windows)
-Install Python
+Install Python and then install esptool with:
 ```
 pip install esptool
 ```
 
 #### Read Wifi-settings
+```
 esptool.py --port COM15 read_flash 0x7E000 128 wifisettings.bin
-
+```
 Address is end of flash minus 8192 (0x2000) bytes: 
 - 512kB (0x80000) - 8192B (0x2000) = 516096B (0x7e000)
 - 4096kB (0x400000) - 8192B (0x2000) = 4186112B (0x3fe000)
