@@ -71,6 +71,8 @@ s="hello.lua";file.remove(s);file.open(s,"w+");file.writeline([[print("hello nod
 ```
 
 ### ESP tool (Windows)
+https://github.com/espressif/esptool
+
 Install Python and then install esptool with:
 ```
 pip install esptool
