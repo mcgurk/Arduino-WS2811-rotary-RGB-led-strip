@@ -1,4 +1,4 @@
-local function hsvToRgb(h, s, v)
+function hsvToRgb(h, s, v)
   local r, g, b
 
   local i = math.floor(h * 6);
