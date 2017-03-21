@@ -40,7 +40,7 @@ init_mqtt( function(conn, topic, input)
     elseif cmd == "RAINBOW" then
       strip.rainbow(t[2])
     elseif cmd == "POINT" then
-      strip.point()
+      strip.point(nil, nil, n[2], n[3], n[4])
     elseif cmd == "COLOR" then
       strip.color(n[2], n[3], n[4])
     elseif cmd == "PING" then
