@@ -1,7 +1,3 @@
---mytimer = tmr.create():alarm(1000, 1, function() print(wifi.sta.getip()) end)
-
-
-
 -- Wifi credentials
 wifi.setmode(wifi.STATION)
 --wifi.sta.config("ssid","password")
@@ -14,25 +10,38 @@ strip.off()
 
 init_mqtt( function(conn, topic, input)
     print("mqtt callback")
-    if string.upper(input) == "ON" then 
+    print("mqtt input: " .. input)
+    print("mqtt input type: " .. type(input))
+    local a = tonumber(input)
+    if a then 
+      print("number")
+      strip.location(a)
+      return
+    end
+    print("not number")
+    cmd = string.upper(input)
+    if cmd == "ON" then 
       strip.rainbow()
-    elseif string.upper(input) == "OFF" then 
+    elseif cmd == "OFF" then 
       strip.off()
-    elseif string.upper(input) == "KITT" then
+    elseif cmd == "KITT" then
       strip.kitt(0.8, 20, 255, 0, 0)
-    elseif string.upper(input) == "RAINBOW" then
+    elseif cmd == "RAINBOW" then
       strip.rainbow()
+    elseif cmd == "POINT" then
+      strip.point()
+    elseif cmd == "PING" then
+      reply_mqtt_ping()
     else
-      --print("execute mqtt input string (type: " .. type(input) .. ")")
+      print("Unknown command")
+      --[[--print("execute mqtt input string (type: " .. type(input) .. ")")
       --loadstring(input)
-      print("mqtt input: " .. input)
-      print("mqtt input type: " .. type(input))
       a = tonumber(input)
       --print(a)
       print("mqtt input tonumber: " .. a)
       print("mqtt input tonumber type: " .. type(a))
       --strip.set(a)
-      strip.location(a)
+      strip.location(a)]]
     end 
   end)
 
