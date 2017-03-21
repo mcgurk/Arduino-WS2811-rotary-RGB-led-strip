@@ -111,6 +111,7 @@ esptool.py --port COM15 write_flash 0x3fe000 blank.bin
 Split string to table:
 ```
 input = "fds,sdsgsdf,sdfasd,asdas"
+local t={}
 for x in string.gmatch(input, "([^,]+)") do table.insert(t, x) end
 ```
 Print table:
