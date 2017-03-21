@@ -32,6 +32,8 @@ function strip.rainbow(brightness, speed)
 end
 
 function strip.color(r, g, b)
+  tmr.stop(2)
+  if not r then r = 128 g = 128 b = 128 end
   buffer:fill(r, g, b)
   ws2812.write(buffer)
 end
@@ -42,11 +44,11 @@ function strip.off()
   ws2812.write(buffer)
 end
 
-function strip.set(location, r, g, b)
-  if not location or location < 1 then location = 1 end
+function strip.set(index, r, g, b)
+  if not index or index < 1 then index = 1 end
+  if index > PIXELCOUNT then index = PIXELCOUNT end
   if not r then r = 128 g = 128 b = 128 end
-  if location > PIXELCOUNT then location = PIXELCOUNT end
-  buffer:set(location, r, g, b)
+  buffer:set(index, r, g, b)
 end
 
 function strip.fade(factor, speed)
@@ -57,12 +59,12 @@ function strip.fade(factor, speed)
   end, speed)
 end
 
-function strip.point(factor, speed)
+function strip.point(factor, speed, r, g, b)
   if not factor then factor = 0.5 end
   if not speed then speed = 100 end
   striptimer(function()
     buffer:mix(factor * 255, buffer)
-    strip.set(location, 255, 0, 0)
+    strip.set(location, r, g, b)
   end, speed)
 end
 
