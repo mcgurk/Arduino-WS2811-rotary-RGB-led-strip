@@ -22,13 +22,12 @@ init_mqtt( function(conn, topic, input)
     end
     print("not number")
     local t={}
-    --local regxEverythingExceptComma = '([^,]+)'
-    --for x in string.gmatch(str, regxEverythingExceptComma) do table.insert(t, x) end
     for x in string.gmatch(input, "([^,]+)") do table.insert(t, x) end
-    --string.gsub(input, ",", function(c) table.insert(t,c) end)
-    print(t)
     for key,value in pairs(t) do print(key,value) end
     cmd = string.upper(t[1])
+    --table.remove(t,1)
+    local n={}
+    for key,value in pairs(t) do n[key] = tonumber(value) end
     print("command: " .. cmd)
     if cmd == "ON" then 
       strip.rainbow()
@@ -36,24 +35,20 @@ init_mqtt( function(conn, topic, input)
       strip.off()
     elseif cmd == "KITT" then
       strip.kitt(0.8, 20, 255, 0, 0)
+    elseif cmd == "TRAVELLER" then
+      strip.kitt(0.8, 20, n[2], n[3], n[4])
     elseif cmd == "RAINBOW" then
-      strip.rainbow()
+      strip.rainbow(t[2])
     elseif cmd == "POINT" then
       strip.point()
     elseif cmd == "COLOR" then
-      strip.color(t[2], t[3], t[4])
+      strip.color(n[2], n[3], n[4])
     elseif cmd == "PING" then
       reply_mqtt_ping()
     else
       print("Unknown command")
       --[[--print("execute mqtt input string (type: " .. type(input) .. ")")
-      --loadstring(input)
-      a = tonumber(input)
-      --print(a)
-      print("mqtt input tonumber: " .. a)
-      print("mqtt input tonumber type: " .. type(a))
-      --strip.set(a)
-      strip.location(a)]]
+      --loadstring(input)]]
     end 
   end)
 
