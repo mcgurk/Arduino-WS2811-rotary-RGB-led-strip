@@ -3,6 +3,7 @@
 function abortInit()
   abort = false
   print("Press ENTER to abort startup")
+  print("Change Wifi-settings: wifi.sta.config(\"ssid\",\"password\")")
   -- if <CR> is pressed, call abortTest
   uart.on("data", "\r", abortTest, 0)
   tmr.alarm(0,3000,0,startup)
