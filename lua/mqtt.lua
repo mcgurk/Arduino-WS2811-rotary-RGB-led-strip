@@ -29,13 +29,16 @@ local function mqtt_do(callback)
           end)
         m:on('message', 
           function(conn, topic, input)
-            print(input)
+            print("mqtt message: *" .. input .. "*")
             callback(conn, topic, input)
           end)
       end)
   end
 end
     
+function reply_mqtt_ping()
+  m:publish("status", clientID .. " ping reply! (flash size: " .. node.flashsize() .. ", heap: " .. node.heap() .. ")", 0, 0)
+end
 
 function init_mqtt(callback)
   print("init_mqtt")
