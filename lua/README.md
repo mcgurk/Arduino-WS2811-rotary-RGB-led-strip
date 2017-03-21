@@ -4,6 +4,12 @@ mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -m "ON"
 mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -m "OFF"
 ```
 
+Retain so command is received after boot or desubscribe:
+```
+mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -r -m "ON"
+mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -r -m "OFF"
+```
+
 ### NodeMcu firmware
 - https://nodemcu-build.com/
 - https://nodemcu.readthedocs.io/en/master/
