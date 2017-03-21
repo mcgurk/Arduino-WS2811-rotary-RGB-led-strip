@@ -3,8 +3,9 @@
 function abortInit()
   abort = false
   print("Press ENTER to abort startup")
+  -- if <CR> is pressed, call abortTest
   uart.on("data", "\r", abortTest, 0)
-  tmr.alarm(0, 3000, 0, startup)
+  tmr.alarm(0,3000,0,startup)
 end
     
 function abortTest(data)
@@ -18,7 +19,7 @@ function startup()
     print("startup aborted")
     return
   end
-  print("in startup")
+  print("Normal startup")
   dofile("main.lua")
 end
 
