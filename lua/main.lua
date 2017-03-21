@@ -1,3 +1,5 @@
+-- main.lua
+
 -- Wifi credentials
 wifi.setmode(wifi.STATION)
 --wifi.sta.config("ssid","password")
@@ -19,7 +21,15 @@ init_mqtt( function(conn, topic, input)
       return
     end
     print("not number")
-    cmd = string.upper(input)
+    local t={}
+    --local regxEverythingExceptComma = '([^,]+)'
+    --for x in string.gmatch(str, regxEverythingExceptComma) do table.insert(t, x) end
+    for x in string.gmatch(input, "([^,]+)") do table.insert(t, x) end
+    --string.gsub(input, ",", function(c) table.insert(t,c) end)
+    print(t)
+    for key,value in pairs(t) do print(key,value) end
+    cmd = string.upper(t[1])
+    print("command: " .. cmd)
     if cmd == "ON" then 
       strip.rainbow()
     elseif cmd == "OFF" then 
@@ -30,6 +40,8 @@ init_mqtt( function(conn, topic, input)
       strip.rainbow()
     elseif cmd == "POINT" then
       strip.point()
+    elseif cmd == "COLOR" then
+      strip.color(t[2], t[3], t[4])
     elseif cmd == "PING" then
       reply_mqtt_ping()
     else
