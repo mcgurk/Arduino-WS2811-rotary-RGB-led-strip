@@ -107,6 +107,16 @@ or with esptool.py:
 ```
 esptool.py --port COM15 write_flash 0x3fe000 blank.bin
 ```
+### Tables
+Split string to table:
+```
+input = "fds,sdsgsdf,sdfasd,asdas"
+for x in string.gmatch(input, "([^,]+)") do table.insert(t, x) end
+```
+Print table:
+```
+for key,value in pairs(t) do print(key,value) end
+```
 
 ### Misc
 
