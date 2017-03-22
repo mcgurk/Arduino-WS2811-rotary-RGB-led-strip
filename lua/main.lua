@@ -4,11 +4,29 @@
 wifi.setmode(wifi.STATION)
 --wifi.sta.config("ssid","password")
 
+print("Save pixelcount: send mqtt message \"save,50\"")
+print("or savecfg(\"pixelcount.cfg\", \"PIXELCOUNT\", 50)")
+
 dofile("mqtt.lua");
 
 dofile("ws2811.lua");
 
 strip.off()
+
+function savecfg(filename, variable, value)
+  local line = variable .. " = " .. value
+  file.remove(filename)
+  file.open(filename, "w+");
+  file.writeline(line)
+  file.close()
+  send_status("*" .. variable .. " = " .. value .. "* saved to " .. filename)
+end
+
+function showcfg(filename)
+  file.open(filename, "r")
+  print("*" .. file.readline() .. "*")
+  file.close();
+end
 
 init_mqtt( function(conn, topic, input)
     print("mqtt callback")
@@ -45,6 +63,18 @@ init_mqtt( function(conn, topic, input)
       strip.color(n[2], n[3], n[4])
     elseif cmd == "PING" then
       reply_mqtt_ping()
+    elseif cmd == "SAVE" then
+      if n[2] then
+        savecfg("pixelcount.cfg", "PIXELCOUNT", n[2])
+        --local line = "PIXELCOUNT = " .. n[2]
+        --file.remove("pixelcount.cfg")
+        --file.open("pixelcount.cfg", "w+");
+        --file.writeline(line)
+        --file.close()
+        --send_status("*" .. n[2] .. "* saved to pixelcount.cfg!")
+      else
+        send_status("pixelcount.cfg not saved!")
+      end
     else
       print("Unknown command")
       --[[--print("execute mqtt input string (type: " .. type(input) .. ")")
