@@ -10,6 +10,18 @@ mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -r -m "ON"
 mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -r -m "OFF"
 ```
 
+MQTT commands:
+- Off: off
+- K.I.T.T: kitt
+- Traveller: Traveller[,r,g,b]
+- Rainbow: rainbow
+- Point: point[,r,g,b]
+- Location of point (if point-mode): just number
+- All same color without animation: color[,r,g,b]
+- Status from status-topic: ping
+- Save pixelcount: save,number_of_pixels
+
+
 ### NodeMcu firmware
 - https://nodemcu-build.com/
 - https://nodemcu.readthedocs.io/en/master/
