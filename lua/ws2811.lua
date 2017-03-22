@@ -4,7 +4,8 @@ require("hsvToRgb")
 
 strip = {}
 
-PIXELCOUNT = 50
+--PIXELCOUNT = 50
+dofile("pixelcount.cfg")
 
 local buffer = ws2812.newBuffer(PIXELCOUNT, 3)
 local i = 1
