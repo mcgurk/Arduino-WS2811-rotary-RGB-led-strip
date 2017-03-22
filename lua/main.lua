@@ -72,6 +72,7 @@ init_mqtt( function(conn, topic, input)
         --file.writeline(line)
         --file.close()
         --send_status("*" .. n[2] .. "* saved to pixelcount.cfg!")
+        dofile("ws2811.lua");
       else
         send_status("pixelcount.cfg not saved!")
       end
