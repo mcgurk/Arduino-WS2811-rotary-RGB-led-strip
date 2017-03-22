@@ -14,7 +14,7 @@ MQTT commands:
 - Off: off
 - K.I.T.T: kitt
 - Traveller: Traveller[,r,g,b]
-- Rainbow: rainbow
+- Rainbow: rainbow[,brightness(0-1.0)]
 - Point: point[,r,g,b]
 - Location of point (if point-mode): just number
 - All same color without animation: color[,r,g,b]
