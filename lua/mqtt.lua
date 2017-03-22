@@ -25,11 +25,11 @@ local function mqtt_do(callback)
         tmr.stop(0)
         m:subscribe(topic, 0, 
           function(conn)
-            print('Subscribed')
+            print("Subscribed to *" .. topic .. "*")
           end)
         m:on('message', 
           function(conn, topic, input)
-            print("mqtt message: *" .. input .. "*")
+            print("mqtt message from topic *" .. topic .. "*: *" .. input .. "*")
             callback(conn, topic, input)
           end)
       end)
@@ -38,6 +38,11 @@ end
     
 function reply_mqtt_ping()
   m:publish("status", clientID .. " ping reply! (flash size: " .. node.flashsize() .. ", heap: " .. node.heap() .. ")", 0, 0)
+end
+
+function send_status(status)
+  print(status)
+  m:publish("status", status, 0, 0)
 end
 
 function init_mqtt(callback)
