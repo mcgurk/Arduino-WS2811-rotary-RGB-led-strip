@@ -56,7 +56,7 @@ init_mqtt( function(conn, topic, input)
     elseif cmd == "TRAVELLER" then
       strip.kitt(0.8, 20, n[2], n[3], n[4])
     elseif cmd == "RAINBOW" then
-      strip.rainbow(t[2])
+      strip.rainbow(n[2])
     elseif cmd == "POINT" then
       strip.point(nil, nil, n[2], n[3], n[4])
     elseif cmd == "COLOR" then
