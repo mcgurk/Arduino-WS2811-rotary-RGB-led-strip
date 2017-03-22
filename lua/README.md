@@ -19,7 +19,7 @@ MQTT commands:
 - Location of point (if point-mode): just number
 - All same color without animation: color[,r,g,b]
 - Status from status-topic: ping
-- Save pixelcount: save,number_of_pixels
+- Save pixelcount: save,number_of_pixels (updates only after next mode-change or restart)
 
 
 ### NodeMcu firmware
