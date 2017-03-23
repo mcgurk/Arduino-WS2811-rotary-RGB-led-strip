@@ -7,11 +7,14 @@ wifi.setmode(wifi.STATION)
 print("Save pixelcount: send mqtt message \"save,50\"")
 print("or savecfg(\"pixelcount.cfg\", \"PIXELCOUNT\", 50)")
 
-dofile("mqtt.lua");
+--dofile("mqtt.lua")
+mqttclient = require("mqttclient")
 
-dofile("ws2811.lua");
+--dofile("ws2811.lua");
+strip = require("ws2811")
+strip.start()
 
-strip.off()
+PINK = { 100, 20, 10 }
 
 function savecfg(filename, variable, value)
   local line = variable .. " = " .. value
@@ -28,7 +31,7 @@ function showcfg(filename)
   file.close();
 end
 
-init_mqtt( function(conn, topic, input)
+mqttclient.start( function(conn, topic, input)
     print("mqtt callback")
     print("mqtt input: " .. input)
     print("mqtt input type: " .. type(input))
@@ -52,7 +55,7 @@ init_mqtt( function(conn, topic, input)
     elseif cmd == "OFF" then 
       strip.off()
     elseif cmd == "KITT" then
-      strip.kitt(0.8, 20, 255, 0, 0)
+      strip.kitt()
     elseif cmd == "TRAVELLER" then
       strip.kitt(0.8, 20, n[2], n[3], n[4])
     elseif cmd == "RAINBOW" then
@@ -61,25 +64,17 @@ init_mqtt( function(conn, topic, input)
       strip.point(nil, nil, n[2], n[3], n[4])
     elseif cmd == "COLOR" then
       strip.color(n[2], n[3], n[4])
-    elseif cmd == "PING" then
-      reply_mqtt_ping()
     elseif cmd == "SAVE" then
       if n[2] then
         savecfg("pixelcount.cfg", "PIXELCOUNT", n[2])
-        --local line = "PIXELCOUNT = " .. n[2]
-        --file.remove("pixelcount.cfg")
-        --file.open("pixelcount.cfg", "w+");
-        --file.writeline(line)
-        --file.close()
-        --send_status("*" .. n[2] .. "* saved to pixelcount.cfg!")
-        dofile("ws2811.lua");
+        strip.off()
+        strip.start()
+        strip.color(100, 100, 100)
       else
         send_status("pixelcount.cfg not saved!")
       end
     else
       print("Unknown command")
-      --[[--print("execute mqtt input string (type: " .. type(input) .. ")")
-      --loadstring(input)]]
     end 
   end)
 
