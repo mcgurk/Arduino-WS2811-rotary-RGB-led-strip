@@ -1,27 +1,27 @@
 -- init.lua
 
-function abortInit()
-  abort = false
-  print("Press ENTER to abort startup")
-  print("Change Wifi-settings: wifi.sta.config(\"ssid\",\"password\")")
-  -- if <CR> is pressed, call abortTest
-  uart.on("data", "\r", abortTest, 0)
-  tmr.alarm(0,3000,0,startup)
-end
-    
-function abortTest(data)
-  abort = true
+local function abortStartup()
+  tmr.stop(0)
   uart.on("data")
+  print("startup aborted")
 end
 
-function startup()
+local function normalStartup()
   uart.on("data")
-  if abort == true then
-    print("startup aborted")
-    return
-  end
   print("Normal startup")
   dofile("main.lua")
 end
 
-tmr.alarm(0, 2000, 0, abortInit)
+local function init()
+  wifi.setmode(wifi.STATION)
+  w = wifi.sta.config -- do shortcut for wifi-settings
+  print("***")
+  print("Press ENTER to abort startup")
+  print("Change Wifi-settings: wifi.sta.config(\"ssid\",\"password\")")
+  print("or: w(\"ssid\",\"password\")")
+  print("***")
+  uart.on("data", "\r", abortStartup, 0)
+  tmr.alarm(0, 3000, 0, normalStartup)
+end
+    
+tmr.alarm(0, 2000, 0, init)
