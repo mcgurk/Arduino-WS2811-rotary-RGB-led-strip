@@ -15,8 +15,9 @@ end
 local function init()
   wifi.setmode(wifi.STATION)
   w = wifi.sta.config -- do shortcut for wifi-settings
+  print(); print()
   print("***")
-  print("Press ENTER to abort startup")
+  print("Press ENTER (\"\\r\") to abort startup")
   print("Change Wifi-settings: wifi.sta.config(\"ssid\",\"password\")")
   print("or: w(\"ssid\",\"password\")")
   print("***")
