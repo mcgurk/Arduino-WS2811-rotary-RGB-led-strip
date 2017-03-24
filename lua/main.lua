@@ -1,20 +1,14 @@
 -- main.lua
 
--- Wifi credentials
-wifi.setmode(wifi.STATION)
---wifi.sta.config("ssid","password")
-
-print("Save pixelcount: send mqtt message \"save,50\"")
-print("or savecfg(\"pixelcount.cfg\", \"PIXELCOUNT\", 50)")
-
---dofile("mqtt.lua")
 mqttclient = require("mqttclient")
 
---dofile("ws2811.lua");
-strip = require("ws2811")
+strip = require("strip")
 strip.start()
 
 PINK = { 100, 20, 10 }
+
+print("Save pixelcount: send mqtt message \"save,50\"")
+print("or savecfg(\"pixelcount.cfg\", \"PIXELCOUNT\", 50)")
 
 function savecfg(filename, variable, value)
   local line = variable .. " = " .. value
