@@ -1,3 +1,6 @@
+// https://github.com/Makuna/NeoPixelBus/wiki/NeoPixelBus-object-API
+// https://github.com/Makuna/NeoPixelBus/wiki/HslColor-object-API
+
 #include <NeoPixelBus.h>
 
 const uint16_t PixelCount = 20;
