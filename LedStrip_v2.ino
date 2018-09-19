@@ -1,24 +1,12 @@
-// NeoPixelTest
-// This example will cycle between showing four pixels as Red, Green, Blue, White
-// and then showing those pixels as Black.
-//
-// Included but commented out are examples of configuring a NeoPixelBus for
-// different color order including an extra white channel, different data speeds, and
-// for Esp8266 different methods to send the data.
-// NOTE: You will need to make sure to pick the one for your platform 
-//
-//
-// There is serial output of the current state so you can confirm and follow along
-//
-
 #include <NeoPixelBus.h>
 
-const uint16_t PixelCount = 150; // this example assumes 4 pixels, making it smaller will cause a failure
-const uint8_t PixelPin = 2;  // make sure to set this to the correct pin, ignored for Esp8266
-char data[1000];
+const uint16_t PixelCount = 20;
+const uint8_t PixelPin = 2;
+//char data[1000];
 uint16_t maxchars = PixelCount*3 + 1;
 
 #define colorSaturation 128
+#define MAX_BRIGHTNESS 128
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>* strip = NULL;
 
@@ -51,12 +39,20 @@ void setup()
 
     Serial.println();
     Serial.println("Running...");
+
+    for(uint16_t i = 0; i < PixelCount; i++) {
+      float c = ((float)i) / ((float)PixelCount);
+      //HslColor color = HslColor(c, 1.0f, ((float)brightness)/2.0f/MAX_BRIGHTNESS);
+      HslColor color = HslColor(c, 1.0f, MAX_BRIGHTNESS / 255.0f);
+      strip->SetPixelColor(i, color);
+    }
+    strip->Show();
 }
 
 
 void loop()
 {
-    delay(1000);
+    /*delay(1000);
 
     Serial.println("Colors R, G, B, W...");
 
@@ -82,34 +78,14 @@ void loop()
     strip->SetPixelColor(1, black);
     strip->SetPixelColor(2, black);
     strip->SetPixelColor(3, black);
-    strip->Show();
-
-/*    delay(5000);
-
-    Serial.println("HSL Colors R, G, B, W...");
-
-    // set the colors, 
-    // if they don't match in order, you may need to use NeoGrbFeature feature
-    strip->SetPixelColor(0, hslRed);
-    strip->SetPixelColor(1, hslGreen);
-    strip->SetPixelColor(2, hslBlue);
-    strip->SetPixelColor(3, hslWhite);
-    strip->Show();
-
-
-    delay(5000);
-
-    Serial.println("Off again...");
-
-    // turn off the pixels
-    strip->SetPixelColor(0, hslBlack);
-    strip->SetPixelColor(1, hslBlack);
-    strip->SetPixelColor(2, hslBlack);
-    strip->SetPixelColor(3, hslBlack);
     strip->Show();*/
 
+    strip->RotateRight(1);
+    strip->Show();
+    
     pollSerial();
 
+    delay(100);
 }
 
 
