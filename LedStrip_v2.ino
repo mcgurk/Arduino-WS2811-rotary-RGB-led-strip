@@ -7,33 +7,18 @@
 
 #define MAX_PIXELS 600
 
+//uint16_t PixelCount = 10;
 uint16_t PixelCount = 150;
 //uint16_t PixelCount = MAX_PIXELS;
 const uint8_t PixelPin = 2;
-//char data[1000];
 uint16_t maxchars = PixelCount*3;
-//uint8_t data[600*3];
 uint16_t frame = 0;
 uint32_t micros_start = micros(), micros_end, micros_diff;
 
-//#define colorSaturation 128
-#define MAX_BRIGHTNESS 64
+#define MAX_BRIGHTNESS 128
 
 //NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>* strip = NULL;
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
-
-/*RgbColor red(colorSaturation, 0, 0);
-RgbColor green(0, colorSaturation, 0);
-RgbColor blue(0, 0, colorSaturation);
-RgbColor white(colorSaturation);
-RgbColor black(0);
-
-HslColor hslRed(red);
-HslColor hslGreen(green);
-HslColor hslBlue(blue);
-HslColor hslWhite(white);
-HslColor hslBlack(black);*/
-
 
 void setup() {
   Serial.begin(115200);
@@ -60,22 +45,52 @@ void setup() {
   if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
 }
 
+#define HSV_HUE_SEXTANT    256
+#define HSV_HUE_STEPS   (6 * HSV_HUE_SEXTANT)
+
+#define HSV_HUE_MIN   0
+#define HSV_HUE_MAX   (HSV_HUE_STEPS - 1)
+#define HSV_SAT_MIN   0
+#define HSV_SAT_MAX   255
+#define HSV_VAL_MIN   0
+#define HSV_VAL_MAX   255
+uint8_t r, g, b;
 
 void loop() {
   //Serial.println("loop begin");
   //uint32_t s,e,t;
-  float b = MAX_BRIGHTNESS / 255.0f;
-  #define SPEED 100
-  float f = ((float)(frame % SPEED)) / SPEED;
+  //float brightness = MAX_BRIGHTNESS / 255.0f;
+  //#define SPEED 100
+  #define SPEED 2
+  //float f = ((float)(frame % SPEED)) / SPEED;
+  //uint16_t f = frame % 1536;
 /*  noInterrupts();
   s = micros();*/
+  //float hue_moving_mult = ((float)frame)/359.0f * HSV_HUE_MAX;
+  //uint16_t hue_moving = (uint16_t) hue_moving_mult;
+  uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/359.0f * HSV_HUE_MAX);
+  float hue_mul = HSV_HUE_MAX/((float)PixelCount);
+  uint8_t *p = strip.Pixels();
   for (uint16_t i = 0; i < PixelCount; i++) {
-    float c = ((float)i) / ((float)PixelCount);
-    c += f;
-    float temp = ((int)c); c -= temp; //take only fractional part
-    HslColor color = HslColor(c, 1.0f, b);
-    strip.SetPixelColor(i, color);
+    //float c = ((float)i) / ((float)PixelCount);
+    //c += f;
+    //float temp = ((int)c); c -= temp; //take only fractional part
+    ////HslColor color = HslColor(c, 1.0f, brightness);
+    //uint8_t r, g, b;
+    //fast_hsv2rgb_32bit(100, 255, 255, &r, &g, &b);
+    uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
+    uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+    fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
+
+    /*uint8_t r, g, b;
+    fast_hsv2rgb_32bit(frame, 255, 255, &r, &g, &b);
+    //r = 100; g = 0; b = 0;
+    RgbColor color = RgbColor(r, g, b);
+    //Serial.print("r:"); Serial.print(r); Serial.print(" g:");Serial.print(g); Serial.print(" b:");Serial.println(b);
+    strip.SetPixelColor(i, color);*/
   }
+  //fast_hsv2rgb_32bit(frame, 255, 255, &r, &g, &b);
+  //Serial.print("r:"); Serial.print(r); Serial.print(" g:");Serial.print(g); Serial.print(" b:");Serial.println(b);
 /*  e = micros();
   interrupts();
   t = e - s;
@@ -83,6 +98,7 @@ void loop() {
 
   noInterrupts();
   s = micros();*/
+  strip.Dirty();
   strip.Show();
 /*  e = micros();
   interrupts();
@@ -130,19 +146,11 @@ void loop() {
     micros_start = micros();
   }
   frame++;
-  if (frame == 1000) frame = 0;
-  //delay(100);
+  if (frame == 360) frame = 0;
+  
+  //delay(500);
 
-    /*Serial.println("------s-----");
-    MEMORY_PRINT_START
-    MEMORY_PRINT_HEAPSTART
-    MEMORY_PRINT_HEAPEND
-    MEMORY_PRINT_STACKSTART
-    MEMORY_PRINT_END
-    MEMORY_PRINT_HEAPSIZE
-    Serial.println();
-    FREERAM_PRINT;
-    Serial.println("------e-----");*/
+
 }
 
 
@@ -154,4 +162,96 @@ void pollSerial() {
   Serial.print(cnt); //Serial.print(":"); Serial.println(data);
   strip.Dirty();
   strip.Show();
+}
+
+
+
+
+//#define HSV_USE_SEXTANT_TEST  /* Limit the hue to 0...360 degrees */
+
+//void fast_hsv2rgb_8bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b);
+//void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b);
+
+/*
+ * Macros that are common to all implementations
+ */
+#define HSV_MONOCHROMATIC_TEST(s,v,r,g,b) \
+  do { \
+    if(!(s)) { \
+       *(r) = *(g) = *(b) = (v); \
+      return; \
+    } \
+  } while(0)
+
+/*#ifdef HSV_USE_SEXTANT_TEST
+#define HSV_SEXTANT_TEST(sextant) \
+  do { \
+    if((sextant) > 5) { \
+      (sextant) = 5; \
+    } \
+  } while(0)
+#else
+#define HSV_SEXTANT_TEST(sextant) do { ; } while(0)
+#endif*/
+
+#define HSV_SWAPPTR(a,b)  do { uint8_t *tmp = (a); (a) = (b); (b) = tmp; } while(0)
+#define HSV_POINTER_SWAP(sextant,r,g,b) \
+  do { \
+    if((sextant) & 2) { \
+      HSV_SWAPPTR((r), (b)); \
+    } \
+    if((sextant) & 4) { \
+      HSV_SWAPPTR((g), (b)); \
+    } \
+    if(!((sextant) & 6)) { \
+      if(!((sextant) & 1)) { \
+        HSV_SWAPPTR((r), (g)); \
+      } \
+    } else { \
+      if((sextant) & 1) { \
+        HSV_SWAPPTR((r), (g)); \
+      } \
+    } \
+  } while(0)
+
+void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b) {
+  HSV_MONOCHROMATIC_TEST(s, v, r, g, b);  // Exit with grayscale if s == 0
+
+  uint8_t sextant = h >> 8;
+
+  //HSV_SEXTANT_TEST(sextant);    // Optional: Limit hue sextants to defined space
+
+  HSV_POINTER_SWAP(sextant, r, g, b); // Swap pointers depending which sextant we are in
+
+  *g = v;   // Top level
+
+  // Perform actual calculations
+
+  /*
+   * Bottom level: v * (1.0 - s)
+   * --> (v * (255 - s) + error_corr + 1) / 256
+   */
+  uint16_t ww;    // Intermediate result
+  ww = v * (255 - s); // We don't use ~s to prevent size-promotion side effects
+  ww += 1;    // Error correction
+  ww += ww >> 8;    // Error correction
+  *b = ww >> 8;
+
+  uint8_t h_fraction = h & 0xff;  // 0...255
+  uint32_t d;     // Intermediate result
+
+  if(!(sextant & 1)) {
+    // *r = ...slope_up...;
+    d = v * (uint32_t)((255 << 8) - (uint16_t)(s * (256 - h_fraction)));
+    d += d >> 8;  // Error correction
+    d += v;   // Error correction
+    *r = d >> 16;
+  } else {
+    // *r = ...slope_down...;
+    d = v * (uint32_t)((255 << 8) - (uint16_t)(s * h_fraction));
+    d += d >> 8;  // Error correction
+    d += v;   // Error correction
+    *r = d >> 16;
+  }
+  
 }
