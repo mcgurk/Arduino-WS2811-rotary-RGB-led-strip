@@ -5,6 +5,7 @@
 - Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html)
 - (MemoryUsage (https://github.com/Locoduino/MemoryUsage))
 
+### Usage
 - Rotate to change brightness.
 - Click and after that rotate to change color/temperature.
 - 1s click saves parameters.
