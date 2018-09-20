@@ -5,6 +5,15 @@
 - Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html)
 - (MemoryUsage (https://github.com/Locoduino/MemoryUsage))
 
+Fast HSV -> RGB: http://www.vagrearg.org/content/hsvrgb
+
+Can't use assembler version:
+```
+error: r28 cannot be used in asm here
+error: r29 cannot be used in asm here
+```
+Google says that works with optimization level 1, but I don't know easy way to change optimization level.
+
 ### Usage
 - Rotate to change brightness.
 - Click and after that rotate to change color/temperature.
