@@ -1,9 +1,9 @@
 # Arduino-WS2811-rotary-RGB-led-strip
 
 ### Libraries
-- NeoPixelBus by Makuna
-- Encoder
-- (MemoryUsage)
+- NeoPixelBus by Makuna (https://github.com/Makuna/NeoPixelBus/wiki)
+- Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html)
+- (MemoryUsage (https://github.com/Locoduino/MemoryUsage))
 
 - Rotate to change brightness.
 - Click and after that rotate to change color/temperature.
