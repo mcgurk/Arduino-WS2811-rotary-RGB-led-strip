@@ -1,18 +1,20 @@
+// https://github.com/Makuna/NeoPixelBus
 // https://github.com/Makuna/NeoPixelBus/wiki/NeoPixelBus-object-API
 // https://github.com/Makuna/NeoPixelBus/wiki/HslColor-object-API
 
 #include <NeoPixelBus.h>
-//#include <MemoryUsage.h>
+#include <MemoryUsage.h>
 
 #define MAX_PIXELS 600
 
-const uint16_t PixelCount = 150;
-//const uint16_t PixelCount = MAX_PIXELS;
+uint16_t PixelCount = 150;
+//uint16_t PixelCount = MAX_PIXELS;
 const uint8_t PixelPin = 2;
 //char data[1000];
-uint16_t maxchars = PixelCount*3 + 1;
+uint16_t maxchars = PixelCount*3;
 //uint8_t data[600*3];
 uint16_t frame = 0;
+uint32_t micros_start = micros(), micros_end, micros_diff;
 
 //#define colorSaturation 128
 #define MAX_BRIGHTNESS 64
@@ -33,63 +35,62 @@ HslColor hslWhite(white);
 HslColor hslBlack(black);*/
 
 
-void setup()
-{
-    Serial.begin(115200);
-    //while (!Serial); // wait for serial attach
+void setup() {
+  Serial.begin(115200);
+  //while (!Serial); // wait for serial attach
 
-    Serial.println();
-    Serial.println("Initializing...");
-    Serial.flush();
+  Serial.println();
+  Serial.println("Initializing...");
+  Serial.flush();
 
-    //strip = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(PixelCount, PixelPin); // and recreate with new count
-    strip.Begin();
-    //strip.Show();
+  //strip = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(PixelCount, PixelPin); // and recreate with new count
+  strip.Begin();
+  //strip.Show();
 
-    Serial.println();
-    Serial.println("Running...");
+  Serial.println();
+  Serial.println("Running...");
 
-    /*for(uint16_t i = 0; i < PixelCount; i++) {
-      float c = ((float)i) / ((float)PixelCount);
-      //HslColor color = HslColor(c, 1.0f, ((float)brightness)/2.0f/MAX_BRIGHTNESS);
-      HslColor color = HslColor(c, 1.0f, MAX_BRIGHTNESS / 255.0f);
-      strip.SetPixelColor(i, color);
-    }
-    strip.Show();*/
+  /*for(uint16_t i = 0; i < PixelCount; i++) {
+    float c = ((float)i) / ((float)PixelCount);
+    //HslColor color = HslColor(c, 1.0f, ((float)brightness)/2.0f/MAX_BRIGHTNESS);
+    HslColor color = HslColor(c, 1.0f, MAX_BRIGHTNESS / 255.0f);
+    strip.SetPixelColor(i, color);
+  }
+  strip.Show();*/
+  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
 }
 
 
-void loop()
-{
-//    Serial.println("loop begin");
-    uint32_t s,e,t;
-    float b = MAX_BRIGHTNESS / 255.0f;
-    #define SPEED 100
-    float f = ((float)(frame % SPEED)) / SPEED;
-/*    noInterrupts();
-    s = micros();*/
-    for(uint16_t i = 0; i < PixelCount; i++) {
-      float c = ((float)i) / ((float)PixelCount);
-      c += f;
-      float temp = ((int)c); c -= temp; //take only fractional part
-      HslColor color = HslColor(c, 1.0f, b);
-      strip.SetPixelColor(i, color);
-    }
-/*    e = micros();
-    interrupts();
-    t = e - s;
-    Serial.println(t);
+void loop() {
+  //Serial.println("loop begin");
+  //uint32_t s,e,t;
+  float b = MAX_BRIGHTNESS / 255.0f;
+  #define SPEED 100
+  float f = ((float)(frame % SPEED)) / SPEED;
+/*  noInterrupts();
+  s = micros();*/
+  for (uint16_t i = 0; i < PixelCount; i++) {
+    float c = ((float)i) / ((float)PixelCount);
+    c += f;
+    float temp = ((int)c); c -= temp; //take only fractional part
+    HslColor color = HslColor(c, 1.0f, b);
+    strip.SetPixelColor(i, color);
+  }
+/*  e = micros();
+  interrupts();
+  t = e - s;
+  Serial.println(t);
 
-    noInterrupts();
-    s = micros();*/
-    strip.Show();
-/*    e = micros();
-    interrupts();
-    t = e - s;
-    Serial.println(t);*/
-    /*delay(1000);
+  noInterrupts();
+  s = micros();*/
+  strip.Show();
+/*  e = micros();
+  interrupts();
+  t = e - s;
+  Serial.println(t);*/
+  /*delay(1000);
 
-    Serial.println("Colors R, G, B, W...");
+  Serial.println("Colors R, G, B, W...");
 
     // set the colors, 
     // if they don't match in order, you need to use NeoGrbFeature feature
@@ -115,14 +116,22 @@ void loop()
     strip.SetPixelColor(3, black);
     strip.Show();*/
 
-    //strip.RotateRight(1);
-    //strip.Show();
+  //strip.RotateRight(1);
+  //strip.Show();
     
-    pollSerial();
+  pollSerial();
 
-    frame++;
-    if (frame == 10000) frame = 0;
-    //delay(100);
+  if (frame == 0) {
+    micros_end = micros();
+    micros_diff = micros_end - micros_start;
+    Serial.println(micros_diff);
+    FREERAM_PRINT;
+    Serial.flush();
+    micros_start = micros();
+  }
+  frame++;
+  if (frame == 1000) frame = 0;
+  //delay(100);
 
     /*Serial.println("------s-----");
     MEMORY_PRINT_START
