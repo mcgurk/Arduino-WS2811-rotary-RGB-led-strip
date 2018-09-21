@@ -14,6 +14,9 @@ const uint8_t PixelPin = 2;
 uint16_t maxchars = PixelCount*3;
 uint16_t frame = 0;
 uint32_t micros_start = micros(), micros_end, micros_diff;
+uint8_t mode;
+#define MODE_RAINBOW 1
+#define MODE_BINARY 2
 
 #define MAX_BRIGHTNESS 128
 
@@ -43,6 +46,7 @@ void setup() {
   }
   strip.Show();*/
   if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
+  mode = MODE_RAINBOW;
 }
 
 #define HSV_HUE_SEXTANT    256
@@ -54,94 +58,36 @@ void setup() {
 #define HSV_SAT_MAX   255
 #define HSV_VAL_MIN   0
 #define HSV_VAL_MAX   255
-uint8_t r, g, b;
+//uint8_t r, g, b;
+#define SPEED 2
 
 void loop() {
-  //Serial.println("loop begin");
-  //uint32_t s,e,t;
-  //float brightness = MAX_BRIGHTNESS / 255.0f;
-  //#define SPEED 100
-  #define SPEED 2
-  //float f = ((float)(frame % SPEED)) / SPEED;
-  //uint16_t f = frame % 1536;
-/*  noInterrupts();
-  s = micros();*/
-  //float hue_moving_mult = ((float)frame)/359.0f * HSV_HUE_MAX;
-  //uint16_t hue_moving = (uint16_t) hue_moving_mult;
-  uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/359.0f * HSV_HUE_MAX);
-  float hue_mul = HSV_HUE_MAX/((float)PixelCount);
-  uint8_t *p = strip.Pixels();
-  for (uint16_t i = 0; i < PixelCount; i++) {
-    //float c = ((float)i) / ((float)PixelCount);
-    //c += f;
-    //float temp = ((int)c); c -= temp; //take only fractional part
-    ////HslColor color = HslColor(c, 1.0f, brightness);
-    //uint8_t r, g, b;
-    //fast_hsv2rgb_32bit(100, 255, 255, &r, &g, &b);
-    uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
-    uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-    fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
 
-    /*uint8_t r, g, b;
-    fast_hsv2rgb_32bit(frame, 255, 255, &r, &g, &b);
-    //r = 100; g = 0; b = 0;
-    RgbColor color = RgbColor(r, g, b);
-    //Serial.print("r:"); Serial.print(r); Serial.print(" g:");Serial.print(g); Serial.print(" b:");Serial.println(b);
-    strip.SetPixelColor(i, color);*/
-  }
-  //fast_hsv2rgb_32bit(frame, 255, 255, &r, &g, &b);
-  //Serial.print("r:"); Serial.print(r); Serial.print(" g:");Serial.print(g); Serial.print(" b:");Serial.println(b);
-/*  e = micros();
-  interrupts();
-  t = e - s;
-  Serial.println(t);
-
-  noInterrupts();
-  s = micros();*/
-  strip.Dirty();
-  strip.Show();
-/*  e = micros();
-  interrupts();
-  t = e - s;
-  Serial.println(t);*/
-  /*delay(1000);
-
-  Serial.println("Colors R, G, B, W...");
-
-    // set the colors, 
-    // if they don't match in order, you need to use NeoGrbFeature feature
-    strip.SetPixelColor(0, red);
-    strip.SetPixelColor(1, green);
-    strip.SetPixelColor(2, blue);
-    strip.SetPixelColor(3, white);
-    // the following line demonstrates rgbw color support
-    // if the NeoPixels are rgbw types the following line will compile
-    // if the NeoPixels are anything else, the following line will give an error
-    //strip.SetPixelColor(3, RgbwColor(colorSaturation));
+  if (mode == MODE_RAINBOW) {
+    uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/359.0f * HSV_HUE_MAX);
+    float hue_mul = HSV_HUE_MAX/((float)PixelCount);
+    uint8_t *p = strip.Pixels();
+    for (uint16_t i = 0; i < PixelCount; i++) {
+      uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
+      uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+      fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
+    }
+    strip.Dirty();
     strip.Show();
+  }
 
-
-    delay(1000);
-
-    Serial.println("Off ...");
-
-    // turn off the pixels
-    strip.SetPixelColor(0, black);
-    strip.SetPixelColor(1, black);
-    strip.SetPixelColor(2, black);
-    strip.SetPixelColor(3, black);
-    strip.Show();*/
-
-  //strip.RotateRight(1);
-  //strip.Show();
-    
+  if (mode == MODE_BINARY) {
+    delay(25); 
+  }
+  
   pollSerial();
 
   if (frame == 0) {
     micros_end = micros();
     micros_diff = micros_end - micros_start;
-    Serial.println(micros_diff);
+    //Serial.println(micros_diff);
     FREERAM_PRINT;
+    Serial.print("mode:"); Serial.println(mode);
     Serial.flush();
     micros_start = micros();
   }
@@ -156,24 +102,26 @@ void loop() {
 
 void pollSerial() {
   if (!Serial.available()) return;
-  //uint16_t cnt = Serial.readBytes(data, maxchars);
-  uint16_t cnt = Serial.readBytes(strip.Pixels(), maxchars);
-  //data[cnt] = '\0';
-  Serial.print(cnt); //Serial.print(":"); Serial.println(data);
-  strip.Dirty();
-  strip.Show();
+  char *ptr = strip.Pixels();
+  uint16_t cnt = Serial.readBytes(ptr, maxchars);
+  if (cnt == maxchars) {
+    mode = MODE_BINARY;
+    strip.Dirty();
+    strip.Show();
+  } else {
+    ptr[cnt] = '\0';
+    Serial.print(cnt); Serial.print(":"); Serial.println(ptr);
+    if (ptr[0] == 'r') mode = MODE_RAINBOW;
+    if (ptr[0] == 'b') mode = MODE_BINARY;
+    Serial.print("mode:"); Serial.println(mode);
+    Serial.print("frame:"); Serial.println(frame);
+  }
 }
 
 
 
-
-//#define HSV_USE_SEXTANT_TEST  /* Limit the hue to 0...360 degrees */
-
-//void fast_hsv2rgb_8bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b);
-//void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b);
-
 /*
- * Macros that are common to all implementations
+ * fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b)
  */
 #define HSV_MONOCHROMATIC_TEST(s,v,r,g,b) \
   do { \
@@ -183,16 +131,6 @@ void pollSerial() {
     } \
   } while(0)
 
-/*#ifdef HSV_USE_SEXTANT_TEST
-#define HSV_SEXTANT_TEST(sextant) \
-  do { \
-    if((sextant) > 5) { \
-      (sextant) = 5; \
-    } \
-  } while(0)
-#else
-#define HSV_SEXTANT_TEST(sextant) do { ; } while(0)
-#endif*/
 
 #define HSV_SWAPPTR(a,b)  do { uint8_t *tmp = (a); (a) = (b); (b) = tmp; } while(0)
 #define HSV_POINTER_SWAP(sextant,r,g,b) \
