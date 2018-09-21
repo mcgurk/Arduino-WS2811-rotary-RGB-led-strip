@@ -10,7 +10,7 @@
 - Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html)
 - (MemoryUsage (https://github.com/Locoduino/MemoryUsage))
 
-Fast HSV -> RGB: http://www.vagrearg.org/content/hsvrgb
+Fast HSV -> RGB taken from here: http://www.vagrearg.org/content/hsvrgb
 
 Can't use assembler version:
 ```
