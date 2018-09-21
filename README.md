@@ -1,9 +1,16 @@
 # Arduino-WS2811-rotary-RGB-led-strip
 
+## LedStrip_v2.ino
+
 ### Hardware
 
 - Arduino Pro Micro (Arduino Leonardo selected from Arduino IDE)
 - LED strings: "DC 5V 50PCS WS2811 RGB Full Color 12mm Pixels digital Addressable LED String XD"
+- Databus to pin2
+- 150pcs WS2811 leds with full brightness and rainbow-colors takes 5V/3A
+- 150pcs WS2811 leds with 1/2 brightness and rainbow-colors takes 5V/2A
+- ATmega32u4 SRAM: 2560B (~600 RGB leds)
+- ATmega328p SRAM: 2048B (~? RGB leds)
 
 ### Libraries
 - NeoPixelBus by Makuna (https://github.com/Makuna/NeoPixelBus/wiki)
@@ -70,6 +77,7 @@ stty -F /dev/ttyACM0 1200
 ```
 
 
+## WS2811_valo.ino
 
 ### Usage
 - Rotate to change brightness.
@@ -79,10 +87,6 @@ stty -F /dev/ttyACM0 1200
 
 ![Image](https://github.com/mcgurk/Arduino-WS2811-rotary-RGB-led-strip/raw/master/Arduino_UNO_WS2811-ledstrip_with_rotaryencoder.jpg)
 
-- Databus to pin2
 
-- 150pcs WS2811 leds with 1/2 brightness and rainbow-colors takes 5V/3A
-- 150pcs WS2811 leds with 1/4 brightness and rainbow-colors takes 5V/2A
 
-- ATmega32u4 SRAM: 2560B (~600 RGB leds)
-- ATmega328p SRAM: 2048B (~? RGB leds)
+
