@@ -64,7 +64,7 @@ Back to rainbow mode:
 ser.write(b'r')
 ```
 
-Reset Arduino Pro Micro with python:
+Reset Arduino Pro Micro with Python:
 ```
 import serial
 ser = serial.Serial('/dev/ttyACM0', 1200)
