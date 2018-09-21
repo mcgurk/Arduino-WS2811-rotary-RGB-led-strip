@@ -31,7 +31,7 @@ sudo python3 -m pip install pyserial
 sudo python3 -m pip install numpy
 ```
 
-Program which loads 150x300 image and send one line at the time to led string:
+Program which loads 150x300 image and sends one line at the time to led string:
 ```
 from PIL import Image
 import numpy as np
