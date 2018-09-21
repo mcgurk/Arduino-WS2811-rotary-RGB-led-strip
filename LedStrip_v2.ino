@@ -24,7 +24,8 @@ uint8_t mode;
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 
 void setup() {
-  Serial.begin(115200);
+  //Serial.begin(115200);
+  Serial.begin(2000000);
   //while (!Serial); // wait for serial attach
 
   Serial.println();
@@ -77,7 +78,8 @@ void loop() {
   }
 
   if (mode == MODE_BINARY) {
-    delay(25); 
+    //delay(25);
+    delay(4);
   }
   
   pollSerial();
@@ -86,9 +88,9 @@ void loop() {
     micros_end = micros();
     micros_diff = micros_end - micros_start;
     //Serial.println(micros_diff);
-    FREERAM_PRINT;
+    /*FREERAM_PRINT;
     Serial.print("mode:"); Serial.println(mode);
-    Serial.flush();
+    Serial.flush();*/
     micros_start = micros();
   }
   frame++;
