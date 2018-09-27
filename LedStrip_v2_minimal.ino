@@ -1,6 +1,7 @@
 #include <NeoPixelBus.h>
+#define PIXELS 150
 
-NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(150, 2);
+NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PIXELS, 2);
 uint8_t *ptr;
 
 void setup() {
@@ -11,7 +12,7 @@ void setup() {
 
 void loop() {
   if (Serial.available()) {
-    Serial.readBytes(ptr, 150*3);
+    Serial.readBytes(ptr, PIXELS*3);
     strip.Dirty();
     strip.Show();
   }
@@ -25,7 +26,7 @@ import serial
 import time
 
 ser = serial.Serial('/dev/ttyACM0', 2000000)
-imgarr = np.array(Image.open("/misc/valo.png").convert("RGB"))
+imgarr = np.array(Image.open("/misc/valo.png").convert("RGB")) # image must be PIXELS wide
 
 i = 0
 while 1:
