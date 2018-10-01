@@ -106,10 +106,10 @@ while 1:
   ws2812.write2812(spi, data)
   time.sleep(0.5)
 
-data = np.array([[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
-ws2812.write2812(spi, data)
+# data = np.array([[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
+# ws2812.write2812(spi, data)
 
-for i in range(50): data[i] = [a * 255 for a in colorsys.hsv_to_rgb(i/50,1,1)]
+# for i in range(50): data[i] = [a * 255 for a in colorsys.hsv_to_rgb(i/50,1,1)]
 
 # https://github.com/joosteto/ws2812-spi/issues/2
 ```
