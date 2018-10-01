@@ -1,5 +1,8 @@
 # Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
 
+## Settings
+`sudo armbian-config`
+
 ## Wiring
 https://i.stack.imgur.com/O03j0.jpg
 - 5V
