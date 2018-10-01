@@ -95,6 +95,30 @@ data = np.full((600, 3), [10,10,10], dtype=np.uint8)
 ser.write(data)
 ```
 
+strip.py (150 wide image, strip is 300 wide, so double image. strip is not grb, neopixelbus pixelorder doesn't work?)
+```
+#!/usr/bin/python3
+
+from PIL import Image
+import numpy as np
+import serial
+import time
+
+ser = serial.Serial('/dev/ttyACM0', 2000000)
+img = Image.open("/misc/valo.png").convert("RGB")
+imgarr = np.array(img)
+
+i = 0
+while 1:
+  line = i % 600
+  data = imgarr[line]
+  data[:,[1,0]] = data[:,[0,1]]
+  ser.write(data)
+  ser.write(data)
+  time.sleep(0.02)
+  i += 1
+```
+
 
 ## WS2811_valo.ino
 
