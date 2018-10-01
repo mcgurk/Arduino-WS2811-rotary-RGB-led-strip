@@ -2,6 +2,8 @@
 
 ## Settings
 `sudo armbian-config`
+- Wifi
+- Timezone
 
 ## Wiring
 https://i.stack.imgur.com/O03j0.jpg
