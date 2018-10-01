@@ -45,7 +45,7 @@ sudo python3 -m pip install pillow
 sudo python3 -m pip install pyserial
 sudo python3 -m pip install numpy
 ```
-
+Raspberry Pi - Raspbian: included in Raspbian Desktop
 
 Program which loads 150x300 image and sends one line at the time to led string:
 ```
