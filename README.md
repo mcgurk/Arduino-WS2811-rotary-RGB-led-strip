@@ -85,6 +85,16 @@ Reset Arduino Pro Micro from shell:
 stty -F /dev/ttyACM0 1200
 ```
 
+Clear
+```
+import numpy as np
+import serial
+ser = serial.Serial('/dev/ttyACM0', 2000000)
+# data = np.zeros((600,3), dtype=np.uint8)
+data = np.full((600, 3), [10,10,10], dtype=np.uint8)
+ser.write(data)
+```
+
 
 ## WS2811_valo.ino
 
