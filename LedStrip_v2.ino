@@ -26,6 +26,7 @@ NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 void setup() {
   //Serial.begin(115200);
   Serial.begin(2000000);
+  Serial.setTimeout(10);
   //while (!Serial); // wait for serial attach
 
   Serial.println();
