@@ -68,7 +68,10 @@ Hack for first LED -problem (works only without numpy?):
 ```
 sudo sed -i 's/tx=[]/tx=[0x00]/g' /usr/local/lib/python3.5/dist-packages/ws2812.py
 ```
-
+Hack for first LED -problem (with numpy?):
+```
+data = np.insert(data, 0, [0,0,0], axis=0)
+```
 
 ### Test SPI
 
