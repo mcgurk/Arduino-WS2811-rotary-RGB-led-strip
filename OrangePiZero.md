@@ -1,4 +1,36 @@
-Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
+# Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
+
+## SPI-device
+
+There is no /dev/spidev* -devices at start. We can't use /dev/spidev0.0, because it's used by flash-memory. Let's make /dev/spidev1.0:
+/boot/armbianEnv.txt:
+```
+overlays=spi-spidev usbhost2 usbhost3
+param_spidev_spi_bus=1
+param_spidev_max_freq=100000000
+```
+Reboot
+
+`crw------- 1 root root 153, 0 Oct  1 10:45 /dev/spidev1.0`
+
+Let's make it accessible without root. 
+/etc/udev/rules.d/50-spi.rules:
+`SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"`
+```
+sudo udevadm control --reload-rules
+sudo groupadd spiuser
+sudo adduser "$USER" spiuser
+```
+(remember that adding to group doesn't come active until new login)
+
+```
+sudo modprobe -r spidev
+sudo modprobe spidev
+```
+
+`crw-rw---- 1 root spiuser 153, 0 Oct  1 10:56 /dev/spidev1.0`
+ 
+## Python 3
 
 ```
 sudo apt install python3-pip python3-dev python3-setuptools zlib1g-dev libjpeg-dev
@@ -16,30 +48,6 @@ https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-with
 https://github.com/jgarff/rpi_ws281x (Userspace Raspberry Pi PWM library for WS281X LEDs)
 https://oshlab.com/orange-pi-zero-pinout/
 
-SPI0:aa (spidev0.0) ei voi käyttää, koska se on flashin käytössä.
-Tällä ilmestyy /dev/spidev1.0:
-/boot/armbianEnv.txt:
-```
-overlays=spi-spidev usbhost2 usbhost3
-param_spidev_spi_bus=1
-param_spidev_max_freq=100000000
-```
-
-`crw------- 1 root root 153, 0 Oct  1 10:45 /dev/spidev1.0`
-
-/etc/udev/rules.d/50-spi.rules:
-SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"
-
-sudo udevadm control --reload-rules
-sudo groupadd spiuser
-sudo adduser "$USER" spiuser
-(muista että groupadd ei tuu voimaan ennen uutta loggausta)
-
-sudo modprobe -r spidev
-sudo modprobe spidev
-
-crw-rw---- 1 root spiuser 153, 0 Oct  1 10:56 /dev/spidev1.0
- 
 sudo python3 -m pip install spidev
 sudo python3 -m pip install git+https://github.com/joosteto/ws2812-spi
 (cd ~
