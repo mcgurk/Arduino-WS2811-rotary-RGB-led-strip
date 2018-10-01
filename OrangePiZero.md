@@ -15,7 +15,9 @@ Reboot
 
 Let's make it accessible without root. 
 /etc/udev/rules.d/50-spi.rules:
-`SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"`
+```
+SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"
+```
 ```
 sudo udevadm control --reload-rules
 sudo groupadd spiuser
