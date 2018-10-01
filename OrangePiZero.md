@@ -8,8 +8,7 @@ https://i.stack.imgur.com/O03j0.jpg
 
 ## SPI-device
 
-There is no /dev/spidev* -devices at start. We can't use /dev/spidev0.0, because it's used by flash-memory. Let's make /dev/spidev1.0:
-/boot/armbianEnv.txt:
+There is no /dev/spidev* -devices at start. We can't use /dev/spidev0.0, because it's used by flash-memory. Let's make /dev/spidev1.0 by editing /boot/armbianEnv.txt:
 ```
 overlays=spi-spidev usbhost2 usbhost3
 param_spidev_spi_bus=1
