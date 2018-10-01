@@ -90,9 +90,10 @@ ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 
 ```
 import numpy as np
-import colorsys
+import time
 import spidev
 import ws2812
+import colorsys
 
 spi = spidev.SpiDev()
 spi.open(1,0)
