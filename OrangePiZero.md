@@ -1,4 +1,4 @@
-# CAN'T GET STABLE. RANDOM FLICKERS.
+# CAN'T GET STABLE. RANDOM FLICKERING.
 
 # Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
 
