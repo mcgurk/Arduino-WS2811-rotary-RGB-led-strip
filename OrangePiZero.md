@@ -1,5 +1,11 @@
 # Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
 
+## Wiring
+https://i.stack.imgur.com/O03j0.jpg
+- 5V
+- GND
+- MOSI (SPI1 MOSI/GPIO15/Pin19)
+
 ## SPI-device
 
 There is no /dev/spidev* -devices at start. We can't use /dev/spidev0.0, because it's used by flash-memory. Let's make /dev/spidev1.0:
@@ -41,38 +47,30 @@ sudo python3 -m pip install pillow
 sudo python3 -m pip install pyserial
 sudo python3 -m pip install numpy
 ```
+(Numpy installation takes about 16minutes)
 
-https://github.com/joosteto/ws2812-spi
-https://github.com/joosteto/ws2812-spi/issues/2
-http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=3318
-https://github.com/doceme/py-spidev
-https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-without-root-permissions
-https://github.com/jgarff/rpi_ws281x (Userspace Raspberry Pi PWM library for WS281X LEDs)
-https://oshlab.com/orange-pi-zero-pinout/
-
+```
 sudo python3 -m pip install spidev
 sudo python3 -m pip install git+https://github.com/joosteto/ws2812-spi
-(cd ~
-git clone https://github.com/joosteto/ws2812-spi
-cd ws2812-spi
-sudo python3 setup.py install)
+```
 
-(python3 vs python2 -ongelma?)
-/home/kurkku/ws2812-spi/ws2812.py
-print str(err)
-SyntaxError: invalid syntax
-toimii: print (str(err)))
-
+Let's make ws2812 compatible with Python 3:
+```
 sudo sed -i 's/str(err)/(str(err))/g' /usr/local/lib/python3.5/dist-packages/ws2812.py
+```
 
-test spi:
+### Test SPI
+
+```
 import spidev
 spi = spidev.SpiDev()
 spi.open(1, 0)
 to_send = [0x01, 0x02, 0x03]
 spi.xfer(to_send)
+```
 
-test ws2812:
+### Test ws2812
+```
 import spidev
 import ws2812
 spi = spidev.SpiDev()
@@ -80,14 +78,11 @@ spi.open(1,0)
 
 #write 4 WS2812's, with the following colors: red, green, blue, yellow
 ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
+```
 
-https://i.stack.imgur.com/O03j0.jpg
-5V
-MOSI (SPI1 MOSI/GPIO15/Pin19)
-GND
+## Code
 
-https://docs.python.org/2/library/colorsys.html
-https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
+```
 import numpy as np
 import colorsys
 
@@ -103,3 +98,15 @@ data = np.array([[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 ws2812.write2812(spi, data)
 
 for i in range(50): data[i] = array(colorsys.hsv_to_rgb(i/50,1,1))*255
+```
+
+https://github.com/joosteto/ws2812-spi
+https://github.com/joosteto/ws2812-spi/issues/2
+http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=3318
+https://github.com/doceme/py-spidev
+https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-without-root-permissions
+https://github.com/jgarff/rpi_ws281x (Userspace Raspberry Pi PWM library for WS281X LEDs)
+https://oshlab.com/orange-pi-zero-pinout/
+
+https://docs.python.org/2/library/colorsys.html
+https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
