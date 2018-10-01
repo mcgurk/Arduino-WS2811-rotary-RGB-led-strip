@@ -64,7 +64,7 @@ Let's make ws2812 compatible with Python 3:
 ```
 sudo sed -i 's/str(err)/(str(err))/g' /usr/local/lib/python3.5/dist-packages/ws2812.py
 ```
-Hack for first LED -problem:
+Hack for first LED -problem (works only without numpy?):
 ```
 sudo sed -i 's/tx=[]/tx=[0x00]/g' /usr/local/lib/python3.5/dist-packages/ws2812.py
 ```
@@ -103,7 +103,7 @@ import colorsys
 spi = spidev.SpiDev()
 spi.open(1,0)
 
-data = np.zeros((50,3), dtype=numpy.uint8)
+data = np.zeros((50,3), dtype=np.uint8)
 
 while 1:
   for i in range(50):
