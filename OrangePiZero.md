@@ -150,9 +150,11 @@ def write2812(spi, colors):
   ]
   spi.writebytes(tx)
   
+frame = 0
 while 1:
   for i in range(50):
-    data[i] = np.array(colorsys.hsv_to_rgb(i/50, 1, 1))*255
+    h = float((frame + i) % 50) / 50
+    data[i] = np.array(colorsys.hsv_to_rgb(h, 1, 1))*255
   write2812(spi, data)
   time.sleep(0.05)
 ```
