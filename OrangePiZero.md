@@ -1,3 +1,5 @@
+# CAN'T GET STABLE. RANDOM FLICKERS.
+
 # Orange Pi Zero, Armbian 5.60 (Stretch) 4.14.70-sunxi
 
 ## Settings
@@ -133,6 +135,7 @@ import colorsys
 
 spi = spidev.SpiDev()
 spi.open(1,0)
+spi.max_speed_hz = int(4/1.05e-6)
 
 data = np.zeros((50,3), dtype=np.uint8)
 
