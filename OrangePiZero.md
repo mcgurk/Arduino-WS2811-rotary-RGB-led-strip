@@ -17,6 +17,8 @@ overlays=spi-spidev usbhost2 usbhost3
 param_spidev_spi_bus=1
 param_spidev_max_freq=100000000
 ```
+(you can also use sudo armbian-config: System settings -> Edit boot environment)
+
 Reboot
 
 `crw------- 1 root root 153, 0 Oct  1 10:45 /dev/spidev1.0`
