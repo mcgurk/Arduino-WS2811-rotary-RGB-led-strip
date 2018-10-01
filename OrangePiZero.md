@@ -128,9 +128,8 @@ while 1:
 - https://github.com/joosteto/ws2812-spi
 - https://github.com/joosteto/ws2812-spi/issues/2
 - http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=3318
-- https://github.com/doceme/py-spidev
 - https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-without-root-permissions
-- https://github.com/jgarff/rpi_ws281x (Userspace Raspberry Pi PWM library for WS281X LEDs)
 
+- https://github.com/doceme/py-spidev
 - https://docs.python.org/2/library/colorsys.html
 - https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
