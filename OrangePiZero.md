@@ -157,6 +157,7 @@ while 1:
     data[i] = np.array(colorsys.hsv_to_rgb(h, 1, 1))*255
   write2812(spi, data)
   time.sleep(0.05)
+  frame += 1
 ```
 
 ## Links
