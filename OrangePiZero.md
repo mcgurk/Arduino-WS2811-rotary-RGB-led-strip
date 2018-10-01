@@ -125,6 +125,35 @@ while 1:
 # https://github.com/joosteto/ws2812-spi/issues/6
 ```
 
+```
+import numpy as np
+import time
+import spidev
+import colorsys
+
+spi = spidev.SpiDev()
+spi.open(1,0)
+
+data = np.zeros((50,3), dtype=np.uint8)
+
+def write2812(spi, colors):
+  tx = [0x00] + [ int(
+    ((byte >> (2 * ibit + 1)) & 1) * 0x60 +
+    ((byte >> (2 * ibit + 0)) & 1) * 0x06 +
+    0x88 )
+    for rgb in colors
+    for byte in rgb
+    for ibit in range(3, -1, -1)
+  ]
+  spi.writebytes(tx)
+  
+while 1:
+  for i in range(50):
+    data[i] = np.array(colorsys.hsv_to_rgb(i/50, 1, 1))*255
+  write2812(spi, data)
+  time.sleep(0.05)
+```
+
 ## Links
 - http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=3318
 - https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-without-root-permissions
