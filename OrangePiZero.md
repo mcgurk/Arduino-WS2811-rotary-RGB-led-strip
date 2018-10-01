@@ -91,6 +91,11 @@ ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 ```
 import numpy as np
 import colorsys
+import spidev
+import ws2812
+
+spi = spidev.SpiDev()
+spi.open(1,0)
 
 data = np.zeros((50,3), dtype=int)
 
@@ -104,6 +109,8 @@ data = np.array([[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 ws2812.write2812(spi, data)
 
 for i in range(50): data[i] = [a * 255 for a in colorsys.hsv_to_rgb(i/50,1,1)]
+
+# https://github.com/joosteto/ws2812-spi/issues/2
 ```
 
 ## Links
