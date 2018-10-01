@@ -8,6 +8,14 @@ sudo python3 -m pip install pyserial
 sudo python3 -m pip install numpy
 ```
 
+https://github.com/joosteto/ws2812-spi
+https://github.com/joosteto/ws2812-spi/issues/2
+http://www.orangepi.org/orangepibbsen/forum.php?mod=viewthread&tid=3318
+https://github.com/doceme/py-spidev
+https://forum.up-community.org/discussion/2141/tutorial-gpio-i2c-spi-access-without-root-permissions
+https://github.com/jgarff/rpi_ws281x (Userspace Raspberry Pi PWM library for WS281X LEDs)
+https://oshlab.com/orange-pi-zero-pinout/
+
 SPI0:aa (spidev0.0) ei voi käyttää, koska se on flashin käytössä.
 Tällä ilmestyy /dev/spidev1.0:
 /boot/armbianEnv.txt:
