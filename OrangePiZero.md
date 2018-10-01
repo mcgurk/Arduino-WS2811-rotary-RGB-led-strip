@@ -94,16 +94,16 @@ import colorsys
 
 data = np.zeros((50,3), dtype=int)
 
-# while 1:
-for i in range(50):
-  data[i] = colorsys.hsv_to_rgb(i/50,1,1)
-ws2812.write2812(spi, data)
-time.sleep(0.5)
+while 1:
+  for i in range(50):
+    data[i] = [a * 255 for a in colorsys.hsv_to_rgb(i/50,1,1)]
+  ws2812.write2812(spi, data)
+  time.sleep(0.5)
 
 data = np.array([[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 ws2812.write2812(spi, data)
 
-for i in range(50): data[i] = array(colorsys.hsv_to_rgb(i/50,1,1))*255
+for i in range(50): data[i] = [a * 255 for a in colorsys.hsv_to_rgb(i/50,1,1)]
 ```
 
 ## Links
