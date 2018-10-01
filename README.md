@@ -107,12 +107,12 @@ import time
 ser = serial.Serial('/dev/ttyACM0', 2000000)
 img = Image.open("/misc/valo.png").convert("RGB")
 imgarr = np.array(img)
+imgarr[:,:,[1,0]] = imgarr[:,:,[0,1]] # RGB -> GRB
 
 i = 0
 while 1:
   line = i % 600
-  data = imgarr[line]
-  data[:,[1,0]] = data[:,[0,1]]
+  data = imgarr[line] // 2
   ser.write(data)
   ser.write(data)
   time.sleep(0.02)
