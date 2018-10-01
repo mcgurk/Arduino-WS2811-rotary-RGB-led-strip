@@ -107,7 +107,7 @@ import time
 ser = serial.Serial('/dev/ttyACM0', 2000000)
 img = Image.open("/misc/valo.png").convert("RGB")
 imgarr = np.array(img)
-#imgarr[:,:,1] = 0 # G = 0
+#imgarr[:,:,1] = 0 # G = 0 (R0, G1, B2)
 imgarr[:,:,[1,0]] = imgarr[:,:,[0,1]] # RGB -> GRB
 
 i = 0
