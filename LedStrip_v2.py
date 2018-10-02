@@ -1,35 +1,37 @@
 #!/usr/bin/python3
 
-# sudo python3 -m pip install paho-mqtt
-# sudo python3 -m pip install parse
-
-# myconfig.py:
-# mqtt_username = "username"
-# mqtt_password = "password"
-# mqtt_broker = "broker_address"
-
 import time
 import paho.mqtt.client as paho
 import numpy as np
 import serial
+import parse
 from myconfig import *
 
 def fill(r, g, b):
-  data = np.full((600, 3), [r, g, b], dtype=np.uint8)
+  #data = np.full((600, 3), [r, g, b], dtype=np.uint8)
+  data = np.full((600, 3), [g, r, b], dtype=np.uint8)
   ser.write(data)
 
 def rainbow():
   ser.write(b'r')
 
 def on_message(client, userdata, message):
-  print("received message =",str(message.payload.decode("utf-8")))
-  print(message.payload.upper())
-  if message.payload.upper() == b"CLEAR":
+  msg = str(message.payload.decode("utf-8"))
+  print("received message =", msg)
+  print(msg.upper())
+  if msg.upper() == "CLEAR":
     print("clear!")
     fill(0, 0, 0)
-  if message.payload.upper() == b"RAINBOW":
+  if msg.upper() == "RAINBOW":
     print("rainbow!")
     rainbow()
+  print("eka")
+  koe = parse.parse("fill {:d} {:d} {:d}", msg)
+  print("toka")
+  print(koe)
+  if koe:
+    print("fill")
+    fill(koe[0], koe[1], koe[2])
 
 ser = serial.Serial('/dev/ttyACM0', 2000000)
 
