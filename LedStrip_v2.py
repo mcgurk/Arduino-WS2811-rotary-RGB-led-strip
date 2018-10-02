@@ -4,7 +4,7 @@ import time
 import paho.mqtt.client as paho
 import numpy as np
 import serial
-import parse
+from parse import parse
 from myconfig import *
 
 def fill(r, g, b):
@@ -26,7 +26,7 @@ def on_message(client, userdata, message):
     print("rainbow!")
     rainbow()
   print("eka")
-  koe = parse.parse("fill {:d} {:d} {:d}", msg)
+  koe = parse("fill {:d} {:d} {:d}", msg)
   print("toka")
   print(koe)
   if koe:
