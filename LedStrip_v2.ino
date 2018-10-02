@@ -8,26 +8,31 @@
 #define MAX_PIXELS 600
 
 //uint16_t PixelCount = 10;
-uint16_t PixelCount = 150;
+uint16_t PixelCount = 300;
 //uint16_t PixelCount = MAX_PIXELS;
 const uint8_t PixelPin = 2;
 uint16_t maxchars = PixelCount*3;
-uint16_t frame = 0;
+uint16_t frame;
 uint32_t micros_start = micros(), micros_end, micros_diff;
 uint8_t mode;
+uint16_t fade;
+uint8_t fading;
 #define MODE_RAINBOW 1
 #define MODE_BINARY 2
 
-#define MAX_BRIGHTNESS 128
+//#define MAX_BRIGHTNESS 128
+#define MAX_BRIGHTNESS 255
+//#define MAX_BRIGHTNESS 10
 
 //NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>* strip = NULL;
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
+//NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 
 void setup() {
   //Serial.begin(115200);
   Serial.begin(2000000);
-  Serial.setTimeout(10);
   //while (!Serial); // wait for serial attach
+  Serial.setTimeout(10);
 
   Serial.println();
   Serial.println("Initializing...");
@@ -49,6 +54,8 @@ void setup() {
   strip.Show();*/
   if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
   mode = MODE_RAINBOW;
+  frame = 1;
+  fading = 1;
 }
 
 #define HSV_HUE_SEXTANT    256
@@ -65,14 +72,27 @@ void setup() {
 
 void loop() {
 
+  //fade = log(frame);
+  //fade = pow((double)frame, 2.0) / 40.0;
+  if (fading) {
+    fade = pow((double)frame, 3.0) / 8000.0;
+  } else {
+    fade = MAX_BRIGHTNESS;
+  }
+  if (fade > MAX_BRIGHTNESS) {
+    fade = MAX_BRIGHTNESS;
+    fading = 0;
+  }
+  
   if (mode == MODE_RAINBOW) {
     uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/359.0f * HSV_HUE_MAX);
-    float hue_mul = HSV_HUE_MAX/((float)PixelCount);
+    float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/2);
     uint8_t *p = strip.Pixels();
     for (uint16_t i = 0; i < PixelCount; i++) {
       uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-      fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
+      //fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
+      fast_hsv2rgb_32bit(hue, 255, fade, p++, p++, p++);
     }
     strip.Dirty();
     strip.Show();
@@ -85,17 +105,17 @@ void loop() {
   
   pollSerial();
 
-  if (frame == 0) {
+  /*if (frame == 0) {
     micros_end = micros();
     micros_diff = micros_end - micros_start;
     //Serial.println(micros_diff);
-    /*FREERAM_PRINT;
-    Serial.print("mode:"); Serial.println(mode);
-    Serial.flush();*/
+    //FREERAM_PRINT;
+    //Serial.print("mode:"); Serial.println(mode);
+    //Serial.flush();
     micros_start = micros();
-  }
+  }*/
   frame++;
-  if (frame == 360) frame = 0;
+  if (frame == 360) frame = 1;
   
   //delay(500);
 
@@ -114,7 +134,11 @@ void pollSerial() {
   } else {
     ptr[cnt] = '\0';
     Serial.print(cnt); Serial.print(":"); Serial.println(ptr);
-    if (ptr[0] == 'r') mode = MODE_RAINBOW;
+    if (ptr[0] == 'r') {
+      frame = 1;
+      fading = 1;
+      mode = MODE_RAINBOW;
+    }
     if (ptr[0] == 'b') mode = MODE_BINARY;
     Serial.print("mode:"); Serial.println(mode);
     Serial.print("frame:"); Serial.println(frame);
