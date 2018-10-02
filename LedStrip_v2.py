@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# sudo python3 -m pip install paho-mqtt
+# sudo python3 -m pip install parse
 # myconfig.py:
 # mqtt_username = "username"
 # mqtt_password = "password"
