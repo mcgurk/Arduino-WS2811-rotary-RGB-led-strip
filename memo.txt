@@ -6,6 +6,8 @@ esp32 (300x300)
 mikrofoni
 ir
 
+https://learn.adafruit.com/memories-of-an-arduino/measuring-free-memory
+
 https://github.com/bblanchon/ArduinoJson/issues/429
 
 {"mode":"rainbow"}
