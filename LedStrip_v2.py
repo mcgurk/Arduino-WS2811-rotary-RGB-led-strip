@@ -13,7 +13,7 @@ def fill(r, g, b):
   ser.write(data)
 
 def rainbow():
-  ser.write(b'r')
+  ser.write(b'{"mode":"rainbow"}')
 
 def on_message(client, userdata, message):
   msg = str(message.payload.decode("utf-8"))
