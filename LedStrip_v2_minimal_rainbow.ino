@@ -5,10 +5,11 @@
 #include <NeoPixelBus.h>
 
 #define MAX_PIXELS 300
-//#define MAX_BRIGHTNESS 128
-#define MAX_BRIGHTNESS 5
+#define MAX_BRIGHTNESS 128
 #define SPEED 1
 #define PERIODS 2
+// (100 ledstrip: 100, 255, 0.1, 1)
+// (300 ledstrip: 300, 128, 2, 2)
 
 const uint8_t PixelPin = 2;
 uint16_t frame = 0;
@@ -41,7 +42,7 @@ void loop() {
   strip.Show();
   frame++;
   //if (frame == 360) frame = 0;
-  if (frame == MAX_PIXELS) frame = 0;
+  if (frame == (MAX_PIXELS/SPEED)) frame = 0;
 }
 
 /*
