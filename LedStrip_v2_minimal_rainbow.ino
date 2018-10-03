@@ -10,7 +10,7 @@
 #define PERIODS 2
 
 const uint8_t PixelPin = 2;
-uint16_t frame = 1;
+uint16_t frame = 0;
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 
@@ -27,19 +27,18 @@ void setup() {
 #define HSV_VAL_MAX   255
 
 void loop() {
-    uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/360.0f * HSV_HUE_MAX);
-    float hue_mul = HSV_HUE_MAX/(((float)MAX_PIXELS)/PERIODS);
-    uint8_t *p = strip.Pixels();
-    for (uint16_t i = 0; i < MAX_PIXELS; i++) {
-      uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
-      uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-      fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
-    }
-    strip.Dirty();
-    strip.Show();
+  uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/360.0f * HSV_HUE_MAX);
+  float hue_mul = HSV_HUE_MAX/(((float)MAX_PIXELS)/PERIODS);
+  uint8_t *p = strip.Pixels();
+  for (uint16_t i = 0; i < MAX_PIXELS; i++) {
+    uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
+    uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+    fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
   }
+  strip.Dirty();
+  strip.Show();
   frame++;
-  if (frame == 360) frame = 1;
+  if (frame == 360) frame = 0;
 }
 
 /*
@@ -78,8 +77,6 @@ void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g
   HSV_MONOCHROMATIC_TEST(s, v, r, g, b);  // Exit with grayscale if s == 0
 
   uint8_t sextant = h >> 8;
-
-  //HSV_SEXTANT_TEST(sextant);    // Optional: Limit hue sextants to defined space
 
   HSV_POINTER_SWAP(sextant, r, g, b); // Swap pointers depending which sextant we are in
 
