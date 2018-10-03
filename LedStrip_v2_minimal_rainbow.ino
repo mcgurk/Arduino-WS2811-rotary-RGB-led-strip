@@ -5,8 +5,9 @@
 #include <NeoPixelBus.h>
 
 #define MAX_PIXELS 300
-#define MAX_BRIGHTNESS 128
-#define SPEED 2
+//#define MAX_BRIGHTNESS 128
+#define MAX_BRIGHTNESS 5
+#define SPEED 1
 #define PERIODS 2
 
 const uint8_t PixelPin = 2;
@@ -27,18 +28,20 @@ void setup() {
 #define HSV_VAL_MAX   255
 
 void loop() {
-  uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/360.0f * HSV_HUE_MAX);
-  float hue_mul = HSV_HUE_MAX/(((float)MAX_PIXELS)/PERIODS);
+  //float hue_moving = ((float)(frame*SPEED))/360.0f * HSV_HUE_MAX;
+  float hue_moving = ((float)(frame*SPEED))/MAX_PIXELS * HSV_HUE_MAX;
+  float hue_mul = HSV_HUE_MAX/(MAX_PIXELS/PERIODS);
   uint8_t *p = strip.Pixels();
   for (uint16_t i = 0; i < MAX_PIXELS; i++) {
-    uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
-    uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+    float hue_temp = ((float)i)*hue_mul;
+    uint16_t hue = ((uint16_t)(hue_temp + hue_moving)) % HSV_HUE_MAX;
     fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
   }
   strip.Dirty();
   strip.Show();
   frame++;
-  if (frame == 360) frame = 0;
+  //if (frame == 360) frame = 0;
+  if (frame == MAX_PIXELS) frame = 0;
 }
 
 /*
