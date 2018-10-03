@@ -77,7 +77,7 @@ ser.close()
 
 import serial
 ser = serial.Serial('/dev/ttyACM0', 2000000)
-{"mode":"rainbow", "brightness":5, "pixels":300, "fading":"false", "speed":10, "periods":10}
+ser.write(b'{"mode":"rainbow", "brightness":5, "pixels":300, "fading":"false", "speed":10, "periods":10}')
 ser.close()
 
 {"mode":"rainbow", "brightness":128, "pixels":300, "fading":"false", "speed":2, "periods":2, "save":"true"}')
