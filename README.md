@@ -72,15 +72,16 @@ Command examples (JSON):
 ```
 import serial
 ser = serial.Serial('/dev/ttyACM0', 2000000)
-ser.write(b'{"mode":"rainbow", "brightness":128, "pixels":300, "fading":"false", "speed":2, "periods":2}')
+ser.write(b'{"pixels":300, "mode":"rainbow", "brightness":128, "fading":"false", "speed":2, "periods":2}')
 ser.close()
 
 import serial
 ser = serial.Serial('/dev/ttyACM0', 2000000)
-ser.write(b'{"mode":"rainbow", "brightness":5, "pixels":300, "fading":"false", "speed":10, "periods":10}')
+ser.write(b'{"pixels":300, "mode":"rainbow", "brightness":5, "fading":"false", "speed":10, "periods":10}')
 ser.close()
 
-{"mode":"rainbow", "brightness":128, "pixels":300, "fading":"false", "speed":2, "periods":2, "save":"true"}')
+{"pixels":300, "mode":"rainbow", "brightness":128, "fading":"false", "speed":2, "periods":2, "save":"true"}
+# (pixels, mode, brightness can be saved to eeprom with {"save":"true"})
 ```
 
 Reset Arduino Pro Micro with Python:
