@@ -9,16 +9,24 @@
 
 #define MAX_PIXELS 600
 
-//uint16_t PixelCount = 10;
-uint16_t PixelCount = 300;
-//uint16_t PixelCount = MAX_PIXELS;
+//#define DEBUG
+#ifdef DEBUG
+#define DBG_MSG(msg) Serial.println(msg);
+#else
+#define DBG_MSG(msg)
+#endif
+
+uint16_t PixelCount;
 const uint8_t PixelPin = 2;
-uint16_t maxchars = PixelCount*3;
+uint16_t maxchars;
 uint16_t frame;
 uint32_t micros_start = micros(), micros_end, micros_diff;
 uint8_t mode;
-uint8_t fading;
 uint8_t brightness;
+float speed = 2;
+float periods = 2;
+uint8_t fading = 1;
+
 #define MODE_RAINBOW 1
 #define MODE_BINARY 2
 
@@ -35,6 +43,9 @@ void setup() {
   Serial.begin(2000000);
   //while (!Serial); // wait for serial attach
   Serial.setTimeout(10);
+  #ifdef DEBUG
+  while (!Serial) continue;
+  #endif
 
   Serial.println();
   Serial.println("Initializing...");
@@ -46,11 +57,16 @@ void setup() {
 
   Serial.println();
   Serial.println("Running...");
+  DBG_MSG("DEBUG!");
 
-  EEPROM.get(0, mode);
-  EEPROM.get(1, brightness);
-  if (brightness == 0) brightness = MAX_BRIGHTNESS;
+  EEPROM.get(0, PixelCount);
+  EEPROM.get(2, mode);
+  EEPROM.get(3, brightness);
   if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
+  if (PixelCount < 4) PixelCount = MAX_PIXELS;
+  if (mode > 2 || mode < 1) mode = 1;
+  if (brightness == 0) brightness = MAX_BRIGHTNESS;
+  maxchars = PixelCount*3;
   
   /*for(uint16_t i = 0; i < PixelCount; i++) {
     float c = ((float)i) / ((float)PixelCount);
@@ -59,8 +75,13 @@ void setup() {
     strip.SetPixelColor(i, color);
   }
   strip.Show();*/
-  frame = 1;
+  frame = 0;
   fading = 1;
+
+  Serial.print("PixelCount:"); Serial.println(PixelCount);
+  Serial.print("mode:"); Serial.println(mode);
+  Serial.print("brightness:"); Serial.println(brightness);
+  FREERAM_PRINT;
 }
 
 #define HSV_HUE_SEXTANT    256
@@ -72,8 +93,6 @@ void setup() {
 #define HSV_SAT_MAX   255
 #define HSV_VAL_MIN   0
 #define HSV_VAL_MAX   255
-//uint8_t r, g, b;
-#define SPEED 2
 
 void loop() {
 
@@ -91,13 +110,12 @@ void loop() {
   }
   
   if (mode == MODE_RAINBOW) {
-    uint16_t hue_moving = (uint16_t) (((float)(frame*SPEED))/359.0f * HSV_HUE_MAX);
-    float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/2);
-    uint8_t *p = strip.Pixels();
-    for (uint16_t i = 0; i < PixelCount; i++) {
-      uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
-      uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-      //fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
+  float hue_moving = (((float)(frame))*speed)/((float)PixelCount) * HSV_HUE_MAX;
+  float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/periods);
+  uint8_t *p = strip.Pixels();
+  for (uint16_t i = 0; i < MAX_PIXELS; i++) {
+    float hue_temp = ((float)i)*hue_mul;
+    uint16_t hue = ((uint16_t)(hue_temp + hue_moving)) % HSV_HUE_MAX;
       fast_hsv2rgb_32bit(hue, 255, value, p++, p++, p++);
     }
     strip.Dirty();
@@ -121,13 +139,14 @@ void loop() {
     micros_start = micros();
   }*/
   frame++;
-  if (frame == 360) frame = 1;
+  if (frame == (PixelCount/speed)) frame = 0;
   
   //delay(500);
 
 
 }
 
+#define IF(a,b) if (!strcmp(root[a],b))
 
 void pollSerial() {
   if (!Serial.available()) return;
@@ -146,16 +165,20 @@ void pollSerial() {
       return;
     }
     JsonObject root = doc.as<JsonObject>();
-    //const char* tmp = root["mode"];
-    //Serial.print((const char*)root["mode"]);
     Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\"");
-    if (!strcmp(root["mode"], "rainbow")) {
-      frame = 1;
-      fading = 1;
+    if (root["pixels"]) {
+      PixelCount = root["pixels"];
+      if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
+      if (PixelCount < 4) PixelCount = 4;
+      maxchars = PixelCount*3;
+      Serial.println("PIXELS!");
+    }
+    IF("mode", "rainbow") {
+      frame = 0;
       mode = MODE_RAINBOW;
       Serial.println("RAINBOWMODE!");
     }
-    if (!strcmp(root["mode"], "binary")) {
+    IF("mode", "binary") {
       mode = MODE_BINARY;
       Serial.println("BINARYMODE!");
     }
@@ -163,11 +186,22 @@ void pollSerial() {
       brightness = root["brightness"];
       Serial.println("BRIGHTNESS!");
     }
-    if (!strcmp(root["save"], "true")) {
-      EEPROM.put(0, mode);
-      EEPROM.put(1, brightness);
+    if (root["speed"]) {
+      speed = root["speed"];
+      Serial.println("SPEED!");
+    }
+    if (root["periods"]) {
+      periods = root["periods"];
+      Serial.println("PERIODS!");
+    }
+    IF("save", "true") {
+      EEPROM.put(0, PixelCount);
+      EEPROM.put(2, mode);
+      EEPROM.put(3, brightness);
       Serial.println("SAVE!");
     }
+    IF("fading", "true") fading = 1; else fading = 0;
+    Serial.print("PixelCount:"); Serial.println(PixelCount);
     Serial.print("mode:"); Serial.println(mode);
     Serial.print("brightness:"); Serial.println(brightness);
     Serial.print("frame:"); Serial.println(frame);
