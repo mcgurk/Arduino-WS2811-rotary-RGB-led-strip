@@ -85,6 +85,16 @@ Reset Arduino Pro Micro from shell:
 stty -F /dev/ttyACM0 1200
 ```
 
+Minicom:
+```
+minicom -D /dev/ttyACM0 -b 2000000
+```
+
+Flash from shell (sudo apt install avrdude):
+```
+stty -F /dev/ttyACM0 1200 ; sleep 1 ; avrdude -p m32u4 -b 57600 -P /dev/ttyACM0 -c avr109 -U flash:w:/misc/LedStrip_v2.ino.leonardo.hex:i
+```
+
 Clear
 ```
 import numpy as np
