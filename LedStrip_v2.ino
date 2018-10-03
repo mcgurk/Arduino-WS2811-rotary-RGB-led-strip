@@ -4,6 +4,8 @@
 
 #include <NeoPixelBus.h>
 #include <MemoryUsage.h>
+#include <ArduinoJson.h>
+#include <EEPROM.h>
 
 #define MAX_PIXELS 600
 
@@ -15,8 +17,8 @@ uint16_t maxchars = PixelCount*3;
 uint16_t frame;
 uint32_t micros_start = micros(), micros_end, micros_diff;
 uint8_t mode;
-uint16_t fade;
 uint8_t fading;
+uint8_t brightness;
 #define MODE_RAINBOW 1
 #define MODE_BINARY 2
 
@@ -45,6 +47,11 @@ void setup() {
   Serial.println();
   Serial.println("Running...");
 
+  EEPROM.get(0, mode);
+  EEPROM.get(1, brightness);
+  if (brightness == 0) brightness = MAX_BRIGHTNESS;
+  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
+  
   /*for(uint16_t i = 0; i < PixelCount; i++) {
     float c = ((float)i) / ((float)PixelCount);
     //HslColor color = HslColor(c, 1.0f, ((float)brightness)/2.0f/MAX_BRIGHTNESS);
@@ -52,8 +59,6 @@ void setup() {
     strip.SetPixelColor(i, color);
   }
   strip.Show();*/
-  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
-  mode = MODE_RAINBOW;
   frame = 1;
   fading = 1;
 }
@@ -74,13 +79,14 @@ void loop() {
 
   //fade = log(frame);
   //fade = pow((double)frame, 2.0) / 40.0;
+  uint16_t value;
   if (fading) {
-    fade = pow((double)frame, 3.0) / 8000.0;
+    value = pow((double)frame, 3.0) / 8000.0;
   } else {
-    fade = MAX_BRIGHTNESS;
+    value = brightness;
   }
-  if (fade > MAX_BRIGHTNESS) {
-    fade = MAX_BRIGHTNESS;
+  if (value > brightness) {
+    value = brightness;
     fading = 0;
   }
   
@@ -92,7 +98,7 @@ void loop() {
       uint16_t hue_temp = (uint16_t)(((float)i)*hue_mul);
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
       //fast_hsv2rgb_32bit(hue, 255, MAX_BRIGHTNESS, p++, p++, p++);
-      fast_hsv2rgb_32bit(hue, 255, fade, p++, p++, p++);
+      fast_hsv2rgb_32bit(hue, 255, value, p++, p++, p++);
     }
     strip.Dirty();
     strip.Show();
@@ -132,16 +138,40 @@ void pollSerial() {
     strip.Dirty();
     strip.Show();
   } else {
-    ptr[cnt] = '\0';
-    Serial.print(cnt); Serial.print(":"); Serial.println(ptr);
-    if (ptr[0] == 'r') {
+    StaticJsonDocument<600> doc;
+    DeserializationError error = deserializeJson(doc, ptr);
+    if (error) {
+      Serial.print(F("deserializeJson() failed: "));
+      Serial.println(error.c_str());
+      return;
+    }
+    JsonObject root = doc.as<JsonObject>();
+    //const char* tmp = root["mode"];
+    //Serial.print((const char*)root["mode"]);
+    Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\"");
+    if (!strcmp(root["mode"], "rainbow")) {
       frame = 1;
       fading = 1;
       mode = MODE_RAINBOW;
+      Serial.println("RAINBOWMODE!");
     }
-    if (ptr[0] == 'b') mode = MODE_BINARY;
+    if (!strcmp(root["mode"], "binary")) {
+      mode = MODE_BINARY;
+      Serial.println("BINARYMODE!");
+    }
+    if (root["brightness"]) {
+      brightness = root["brightness"];
+      Serial.println("BRIGHTNESS!");
+    }
+    if (!strcmp(root["save"], "true")) {
+      EEPROM.put(0, mode);
+      EEPROM.put(1, brightness);
+      Serial.println("SAVE!");
+    }
     Serial.print("mode:"); Serial.println(mode);
+    Serial.print("brightness:"); Serial.println(brightness);
     Serial.print("frame:"); Serial.println(frame);
+    FREERAM_PRINT;
   }
 }
 
