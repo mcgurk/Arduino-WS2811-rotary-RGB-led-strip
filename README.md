@@ -68,9 +68,10 @@ play(1000)
 ```
 This gives about 35fps.
 
-Back to rainbow mode:
+Command examples (JSON):
 ```
-ser.write(b'r')
+ser.write(b'{"mode":"rainbow", "brightness":128, "pixels":300, "fading":"false", "speed":2, "periods":2, "save":"true"}')
+{"mode":"rainbow", "brightness":5, "pixels":300, "fading":"false", "speed":10, "periods":10}
 ```
 
 Reset Arduino Pro Micro with Python:
