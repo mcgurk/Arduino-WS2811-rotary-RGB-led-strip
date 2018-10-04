@@ -83,6 +83,9 @@ ser.close()
 
 {"pixels":300, "mode":"rainbow", "brightness":128, "fading":"false", "speed":2, "periods":2, "save":"true"}
 # (pixels, mode, brightness can be saved to eeprom with {"save":"true"})
+
+# fill
+{"mode":"fill", "r":10, "g":10, "b":10}
 ```
 
 Reset Arduino Pro Micro with Python:
