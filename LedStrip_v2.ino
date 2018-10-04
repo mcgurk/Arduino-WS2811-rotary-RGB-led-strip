@@ -23,12 +23,30 @@ float speed = 2;
 float periods = 2;
 uint8_t fading = 1;
 
+#define MODE_OFF 0
 #define MODE_RAINBOW 1
 #define MODE_BINARY 2
+
+struct Effect {
+  uint16_t pixels;
+  uint8_t mode;
+  uint8_t brightness;
+  uint8_t speed;
+  uint8_t periods;
+  uint8_t fading;
+};
 
 //#define MAX_BRIGHTNESS 128
 #define MAX_BRIGHTNESS 255
 //#define MAX_BRIGHTNESS 10
+
+void ensureVariableSanity() {
+  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
+  if (PixelCount < 4) PixelCount = MAX_PIXELS;
+  if (mode > 2) mode = 1;
+  if (brightness == 0) brightness = MAX_BRIGHTNESS;
+  maxchars = PixelCount*3;
+}
 
 #ifdef DEBUG
 #define DBG_MSG(msg) Serial.println(msg);
@@ -37,6 +55,8 @@ uint8_t fading = 1;
 #endif
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
+//NeoGamma<NeoGammaTableMethod> colorGamma;
+NeoGamma<NeoGammaEquationMethod> colorGamma;
 
 void setup() {
   Serial.begin(2000000);
@@ -58,11 +78,7 @@ void setup() {
   EEPROM.get(0, PixelCount);
   EEPROM.get(2, mode);
   EEPROM.get(3, brightness);
-  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
-  if (PixelCount < 4) PixelCount = MAX_PIXELS;
-  if (mode > 2 || mode < 1) mode = 1;
-  if (brightness == 0) brightness = MAX_BRIGHTNESS;
-  maxchars = PixelCount*3;
+  ensureVariableSanity();
   
   /*for(uint16_t i = 0; i < PixelCount; i++) {
     float c = ((float)i) / ((float)PixelCount);
@@ -96,11 +112,14 @@ void loop() {
 
   uint16_t value;
   if (fading) {
-    value = pow((double)frame, 3.0) / 8000.0;
+    int16_t f = frame*2; if (f > 255) f = 255;
+    RgbColor gamma = colorGamma.Correct(RgbColor(f, 0, 0));
+    value = gamma.R;
+    //value = pow((double)frame, 3.0) / 8000.0;
   } else {
     value = brightness;
   }
-  if (value > brightness) {
+  if (value >= brightness) {
     value = brightness;
     fading = 0;
   }
@@ -109,7 +128,7 @@ void loop() {
     uint16_t hue_moving = (((float)(frame))*speed)/((float)PixelCount) * HSV_HUE_MAX;
     float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/periods);
     uint8_t *ptr = strip.Pixels();
-    uint8_t r,g,b;
+    ///uint8_t r,g,b;
     for (uint16_t i = 0; i < PixelCount; i++) {
       uint16_t hue_temp = ((float)i)*hue_mul;
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
@@ -120,7 +139,7 @@ void loop() {
     strip.Show();
   }
 
-  if (mode == MODE_BINARY) {
+  if (mode == MODE_BINARY || mode == MODE_OFF) {
     //delay(25);
     delay(4);
   }
@@ -130,7 +149,8 @@ void loop() {
   frame++;
   if (frame == (PixelCount/speed)) {
     frame = 0;
-    Serial.println("frame0");
+    fading = 0;
+    //Serial.println("frame0");
   }
   
   //delay(20);
@@ -166,10 +186,14 @@ void pollSerial() {
     if (root["mode"]) { Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\""); }
     if (root["pixels"]) {
       PixelCount = root["pixels"];
-      if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
-      if (PixelCount < 4) PixelCount = 4;
-      maxchars = PixelCount*3;
       Serial.println("PIXELS!");
+    }
+    IF("mode", "off") {
+      frame = 0;
+      mode = MODE_OFF;
+      Serial.println("OFFMODE!");
+      strip.ClearTo(RgbColor(0));
+      strip.Show();
     }
     IF("mode", "rainbow") {
       frame = 0;
@@ -192,13 +216,14 @@ void pollSerial() {
       periods = root["periods"];
       Serial.println("PERIODS!");
     }
+    IF("fading", "true") fading = 1; else fading = 0;
     IF("save", "true") {
       EEPROM.put(0, PixelCount);
       EEPROM.put(2, mode);
       EEPROM.put(3, brightness);
       Serial.println("SAVE!");
     }
-    IF("fading", "true") fading = 1; else fading = 0;
+    ensureVariableSanity();
     Serial.print("PixelCount:"); Serial.println(PixelCount);
     Serial.print("mode:"); Serial.println(mode);
     Serial.print("brightness:"); Serial.println(brightness);
