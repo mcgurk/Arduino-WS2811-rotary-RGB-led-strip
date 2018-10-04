@@ -1,5 +1,14 @@
 #!/usr/bin/python3
 
+# sudo python3 -m pip install paho-mqtt
+# sudo python3 -m pip install parse
+
+# myconfig.py:
+# mqtt_username = "username"
+# mqtt_password = "password"
+# mqtt_broker = "broker_address"
+# mqtt_topic = "something/else"
+
 import time
 import paho.mqtt.client as paho
 import numpy as np
@@ -8,8 +17,8 @@ from parse import parse
 from myconfig import *
 
 def fill(r, g, b):
-  #data = np.full((600, 3), [r, g, b], dtype=np.uint8)
-  data = np.full((600, 3), [g, r, b], dtype=np.uint8)
+  #data = np.full((300, 3), [r, g, b], dtype=np.uint8)
+  data = np.full((300, 3), [g, r, b], dtype=np.uint8)
   ser.write(data)
 
 def rainbow():
@@ -19,15 +28,15 @@ def on_message(client, userdata, message):
   msg = str(message.payload.decode("utf-8"))
   print("received message =", msg)
   print(msg.upper())
-  if msg.upper() == "CLEAR":
-    print("clear!")
-    fill(0, 0, 0)
+  if msg.upper() == "OFF":
+    print("off!")
+    #fill(0, 0, 0)
+    ser.write(b'{"mode":"off"}')
   if msg.upper() == "RAINBOW":
     print("rainbow!")
-    rainbow()
-  print("eka")
+    #rainbow()
+    ser.write(b'{"mode":"rainbow"}')
   koe = parse("fill {:d} {:d} {:d}", msg)
-  print("toka")
   print(koe)
   if koe:
     print("fill")
@@ -42,7 +51,7 @@ print("connecting to broker ", mqtt_broker)
 client.connect(mqtt_broker) #connect
 client.loop_start() #start loop to process received messages
 print("subscribing ")
-client.subscribe("house/bulb1") #subscribe
+client.subscribe(mqtt_topic) #subscribe
 
 # SIGINT will normally raise a KeyboardInterrupt, just like any other Python call
 try:
@@ -57,3 +66,4 @@ finally:
   ser.close()
   client.disconnect() #disconnect
   client.loop_stop() #stop loop
+
