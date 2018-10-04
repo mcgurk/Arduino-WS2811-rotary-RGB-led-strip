@@ -11,6 +11,7 @@
 - 150pcs WS2811 leds with 1/2 brightness and rainbow-colors takes 5V/2A
 - ATmega32u4 SRAM: 2560B (~600 RGB leds)
 - ATmega328p SRAM: 2048B (~? RGB leds)
+- If ArduinoJson or other libraries which needs buffers or uses lot of memory, max. 300 RGB leds could be better choice.
 
 ### Libraries
 - NeoPixelBus 2.3.4 by Makuna (https://github.com/Makuna/NeoPixelBus/wiki)
