@@ -13,9 +13,10 @@
 - ATmega328p SRAM: 2048B (~? RGB leds)
 
 ### Libraries
-- NeoPixelBus by Makuna (https://github.com/Makuna/NeoPixelBus/wiki)
-- Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html)
-- (MemoryUsage (https://github.com/Locoduino/MemoryUsage))
+- NeoPixelBus 2.3.4 by Makuna (https://github.com/Makuna/NeoPixelBus/wiki)
+- ArduinoJson 5.13.2 (6.x is beta)
+- MemoryUsage (https://github.com/Locoduino/MemoryUsage)
+- (Encoder (https://www.pjrc.com/teensy/td_libs_Encoder.html))
 
 Fast HSV -> RGB taken from here: http://www.vagrearg.org/content/hsvrgb
 
