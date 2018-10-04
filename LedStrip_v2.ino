@@ -7,7 +7,7 @@
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
-#define MAX_PIXELS 600
+#define MAX_PIXELS 300
 //#define MAX_PIXELS 300
 
 //#define DEBUG
@@ -25,7 +25,9 @@ uint8_t fading = 1;
 
 #define MODE_OFF 0
 #define MODE_RAINBOW 1
-#define MODE_BINARY 2
+#define MODE_FILL 2
+#define MODE_BINARY 3
+#define BIGGEST_MODE_NUMBER 3
 
 struct Effect {
   uint16_t pixels;
@@ -43,7 +45,7 @@ struct Effect {
 void ensureVariableSanity() {
   if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
   if (PixelCount < 4) PixelCount = MAX_PIXELS;
-  if (mode > 2) mode = 1;
+  if (mode > BIGGEST_MODE_NUMBER) mode = 1;
   if (brightness == 0) brightness = MAX_BRIGHTNESS;
   maxchars = PixelCount*3;
 }
@@ -199,6 +201,22 @@ void pollSerial() {
       frame = 0;
       mode = MODE_RAINBOW;
       Serial.println("RAINBOWMODE!");
+    }
+    IF("mode", "fill") {
+      mode = MODE_FILL;
+      uint8_t r = root["r"], g = root["g"], b = root["b"];
+      strip.ClearTo(RgbColor(r,g,b));
+      strip.Show();
+      Serial.println("FILLMODE!");
+    }
+    if (root["a"]) { //for Node-RED color picker, which sends r, g, b, a
+      mode = MODE_FILL;
+      uint8_t r = root["r"], g = root["g"], b = root["b"];
+      RgbColor gamma = colorGamma.Correct(RgbColor(r, g, b));
+      //strip.ClearTo(RgbColor(r,g,b));
+      strip.ClearTo(gamma);
+      strip.Show();
+      Serial.println("FILLMODE-A!");
     }
     IF("mode", "binary") {
       mode = MODE_BINARY;
