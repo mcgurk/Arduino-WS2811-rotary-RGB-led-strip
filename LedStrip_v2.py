@@ -72,6 +72,7 @@ try:
   while 1:
     #print("joo")
     time.sleep(1)
+    ser.flushInput()
 except KeyboardInterrupt:
   print("W: interrupt received, stopping…")
 finally:
