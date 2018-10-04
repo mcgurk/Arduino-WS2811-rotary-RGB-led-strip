@@ -147,7 +147,7 @@ while 1:
 ```
 
 ## Node-RED
-Slider:
+Slider -> Template-node:
 ```
 {"{{topic}}":{{payload}}}
 ```
