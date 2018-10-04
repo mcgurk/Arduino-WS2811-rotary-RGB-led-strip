@@ -147,9 +147,9 @@ while 1:
 ```
 
 ## Node-RED
-Slider -> Template-node:
+E.g. Slider-node -> Template-node -> MQTT-node:
 ```
-{"{{topic}}":{{payload}}}
+{"{{topic}}":"{{payload}}"}
 ```
 Colorwheel works out of box.
 
