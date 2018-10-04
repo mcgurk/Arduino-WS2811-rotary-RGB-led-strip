@@ -13,6 +13,7 @@ import time
 import paho.mqtt.client as paho
 import numpy as np
 import serial
+import json
 from parse import parse
 from myconfig import *
 
@@ -27,7 +28,20 @@ def rainbow():
 def on_message(client, userdata, message):
   msg = str(message.payload.decode("utf-8"))
   print("received message =", msg)
-  print(msg.upper())
+  #print(msg.upper())
+  print(msg)
+  try:
+    root = json.loads(msg)
+  except:
+    print("no JSON")
+  else:
+    print("JSON!")
+    print(root)
+    #ser.write(msg)
+    a = ser.write(message.payload)
+    print(a)
+    print("jsonloppu")
+  print("joo")
   if msg.upper() == "OFF":
     print("off!")
     #fill(0, 0, 0)
@@ -36,8 +50,8 @@ def on_message(client, userdata, message):
     print("rainbow!")
     #rainbow()
     ser.write(b'{"mode":"rainbow"}')
-  koe = parse("fill {:d} {:d} {:d}", msg)
-  print(koe)
+  #koe = parse("fill {:d} {:d} {:d}", msg)
+  #print(koe)
   if koe:
     print("fill")
     fill(koe[0], koe[1], koe[2])
