@@ -146,6 +146,12 @@ while 1:
   i += 1
 ```
 
+## Node-RED
+Slider:
+```
+{"{{topic}}":{{payload}}}
+```
+Colorwheel works out of box.
 
 ## WS2811_valo.ino
 
