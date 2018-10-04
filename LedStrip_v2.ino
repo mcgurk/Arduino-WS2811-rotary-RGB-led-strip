@@ -8,13 +8,9 @@
 #include <EEPROM.h>
 
 #define MAX_PIXELS 600
+//#define MAX_PIXELS 300
 
 //#define DEBUG
-#ifdef DEBUG
-#define DBG_MSG(msg) Serial.println(msg);
-#else
-#define DBG_MSG(msg)
-#endif
 
 uint16_t PixelCount;
 const uint8_t PixelPin = 2;
@@ -34,14 +30,16 @@ uint8_t fading = 1;
 #define MAX_BRIGHTNESS 255
 //#define MAX_BRIGHTNESS 10
 
-//NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>* strip = NULL;
+#ifdef DEBUG
+#define DBG_MSG(msg) Serial.println(msg);
+#else
+#define DBG_MSG(msg)
+#endif
+
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
-//NeoPixelBus<NeoBrgFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 
 void setup() {
-  //Serial.begin(115200);
   Serial.begin(2000000);
-  //while (!Serial); // wait for serial attach
   Serial.setTimeout(10);
   #ifdef DEBUG
   while (!Serial) continue;
@@ -51,9 +49,7 @@ void setup() {
   Serial.println("Initializing...");
   Serial.flush();
 
-  //strip = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(PixelCount, PixelPin); // and recreate with new count
   strip.Begin();
-  //strip.Show();
 
   Serial.println();
   Serial.println("Running...");
@@ -71,10 +67,12 @@ void setup() {
   /*for(uint16_t i = 0; i < PixelCount; i++) {
     float c = ((float)i) / ((float)PixelCount);
     //HslColor color = HslColor(c, 1.0f, ((float)brightness)/2.0f/MAX_BRIGHTNESS);
-    HslColor color = HslColor(c, 1.0f, MAX_BRIGHTNESS / 255.0f);
+    //HslColor color = HslColor(c, 1.0f, MAX_BRIGHTNESS / 255.0f);
+    HslColor color = HslColor(c, 1.0f, 0.5f);
     strip.SetPixelColor(i, color);
   }
   strip.Show();*/
+  
   frame = 0;
   fading = 1;
 
@@ -96,8 +94,6 @@ void setup() {
 
 void loop() {
 
-  //fade = log(frame);
-  //fade = pow((double)frame, 2.0) / 40.0;
   uint16_t value;
   if (fading) {
     value = pow((double)frame, 3.0) / 8000.0;
@@ -110,14 +106,16 @@ void loop() {
   }
   
   if (mode == MODE_RAINBOW) {
-  float hue_moving = (((float)(frame))*speed)/((float)PixelCount) * HSV_HUE_MAX;
-  float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/periods);
-  uint8_t *p = strip.Pixels();
-  for (uint16_t i = 0; i < MAX_PIXELS; i++) {
-    float hue_temp = ((float)i)*hue_mul;
-    uint16_t hue = ((uint16_t)(hue_temp + hue_moving)) % HSV_HUE_MAX;
-      fast_hsv2rgb_32bit(hue, 255, value, p++, p++, p++);
+    uint16_t hue_moving = (((float)(frame))*speed)/((float)PixelCount) * HSV_HUE_MAX;
+    float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/periods);
+    uint8_t *ptr = strip.Pixels();
+    uint8_t r,g,b;
+    for (uint16_t i = 0; i < PixelCount; i++) {
+      uint16_t hue_temp = ((float)i)*hue_mul;
+      uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+      fast_hsv2rgb_32bit(hue, 255, value, ptr++, ptr++, ptr++);
     }
+    //strip.RotateLeft(1); delay(10);
     strip.Dirty();
     strip.Show();
   }
@@ -129,21 +127,13 @@ void loop() {
   
   pollSerial();
 
-  /*if (frame == 0) {
-    micros_end = micros();
-    micros_diff = micros_end - micros_start;
-    //Serial.println(micros_diff);
-    //FREERAM_PRINT;
-    //Serial.print("mode:"); Serial.println(mode);
-    //Serial.flush();
-    micros_start = micros();
-  }*/
   frame++;
-  if (frame == (PixelCount/speed)) frame = 0;
+  if (frame == (PixelCount/speed)) {
+    frame = 0;
+    Serial.println("frame0");
+  }
   
-  //delay(500);
-
-
+  //delay(20);
 }
 
 #define IF(a,b) if (!strcmp(root[a],b))
@@ -157,15 +147,23 @@ void pollSerial() {
     strip.Dirty();
     strip.Show();
   } else {
-    StaticJsonDocument<600> doc;
-    DeserializationError error = deserializeJson(doc, ptr);
+    ptr[cnt] = '\0';
+    /*DynamicJsonDocument doc; //ArduinoJson 6
+    DeserializationError error = deserializeJson(doc, ptr, cnt);
     if (error) {
       Serial.print(F("deserializeJson() failed: "));
       Serial.println(error.c_str());
       return;
     }
-    JsonObject root = doc.as<JsonObject>();
-    Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\"");
+    JsonObject root = doc.as<JsonObject>();*/
+    StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
+    JsonObject& root = jsonBuffer.parseObject(ptr);
+    // Test if parsing succeeds.
+    if (!root.success()) {
+      Serial.println("parseObject() failed");
+      return;
+    }
+    if (root["mode"]) { Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\""); }
     if (root["pixels"]) {
       PixelCount = root["pixels"];
       if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
@@ -207,8 +205,8 @@ void pollSerial() {
     Serial.print("frame:"); Serial.println(frame);
     FREERAM_PRINT;
   }
-}
 
+}
 
 
 /*
@@ -282,5 +280,4 @@ void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g
     d += v;   // Error correction
     *r = d >> 16;
   }
-  
 }
