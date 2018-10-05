@@ -1,3 +1,7 @@
+swap hsv->rgb rgb grb
+
+https://arduinojson.org/v5/api/jsonobject/containskey/
+
 Python:
 threads
 daemon
@@ -15,14 +19,9 @@ https://github.com/bblanchon/ArduinoJson/issues/429
 
 {"mode":"rainbow", "brightness":5}
 
-stty -F /dev/ttyACM0 1200 ; sleep 0.5 ; stty -F /dev/ttyACM0 1200 ; sleep 0.5 ; avrdude -p m32u4 -b 57600 -P /dev/ttyACM0 -c avr109 -U flash:w:/misc/LedStrip_v2.ino.leonardo.hex:i
-
 stty -F /dev/ttyACM0 1200 ; sleep 1 ; avrdude -p m32u4 -b 57600 -P /dev/ttyACM0 -c avr109 -U flash:w:/misc/LedStrip_v2.ino.leonardo.hex:i
 
 stty -F /dev/ttyACM0 1200
 
 minicom -D /dev/ttyACM0 -b 2000000
 
-stty -F /dev/ttyACM0 9600
-
-minicom -D /dev/ttyACM0 -b 1200
