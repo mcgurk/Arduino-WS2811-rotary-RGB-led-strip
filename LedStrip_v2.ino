@@ -33,8 +33,8 @@ struct Effect {
   uint16_t pixels;
   uint8_t mode;
   uint8_t brightness;
-  uint8_t speed;
-  uint8_t periods;
+  float speed;
+  float periods;
   uint8_t fading;
 };
 
@@ -162,14 +162,18 @@ void loop() {
 
 void pollSerial() {
   if (!Serial.available()) return;
-  char *ptr = strip.Pixels();
-  uint16_t cnt = Serial.readBytes(ptr, maxchars);
-  if (cnt == maxchars) {
+  if (Serial.peek() == 'b') {
+    //Serial.println("BINARY");
+    //Serial.println(Serial.read());
+    Serial.read(); //throw 'b' away
     mode = MODE_BINARY;
+    char *ptr = strip.Pixels();
+    uint16_t cnt = Serial.readBytes(ptr, maxchars);
     strip.Dirty();
     strip.Show();
   } else {
-    ptr[cnt] = '\0';
+    //Serial.println("SOMETHINGELSE");
+    //ptr[cnt] = '\0';
     /*DynamicJsonDocument doc; //ArduinoJson 6
     DeserializationError error = deserializeJson(doc, ptr, cnt);
     if (error) {
@@ -178,8 +182,10 @@ void pollSerial() {
       return;
     }
     JsonObject root = doc.as<JsonObject>();*/
-    StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
-    JsonObject& root = jsonBuffer.parseObject(ptr);
+    /*StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
+    JsonObject& root = jsonBuffer.parseObject(ptr);*/
+    DynamicJsonBuffer jsonBuffer(255); //ArduinoJson5
+    JsonObject& root = jsonBuffer.parseObject(Serial);
     // Test if parsing succeeds.
     if (!root.success()) {
       Serial.println("parseObject() failed");
@@ -284,7 +290,7 @@ void pollSerial() {
     } \
   } while(0)
 
-void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b) {
+void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *g, uint8_t *r , uint8_t *b) {
   HSV_MONOCHROMATIC_TEST(s, v, r, g, b);  // Exit with grayscale if s == 0
 
   uint8_t sextant = h >> 8;
