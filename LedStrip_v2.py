@@ -70,9 +70,10 @@ client.subscribe(mqtt_topic) #subscribe
 # SIGINT will normally raise a KeyboardInterrupt, just like any other Python call
 try:
   while 1:
-    #print("joo")
     time.sleep(1)
-    ser.flushInput()
+    if (ser.inWaiting() > 0):
+      data_str = ser.read(ser.inWaiting()).decode('ascii') #read the bytes and convert from binary array to ASCII
+      print(data_str)
 except KeyboardInterrupt:
   print("W: interrupt received, stopping…")
 finally:
