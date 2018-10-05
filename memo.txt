@@ -10,6 +10,7 @@ JsonObject& root = jsonBuffer.parseObject(Serial);
 const char* sensor = root["sensor"];
 Serial.println(sensor);
 
+Miten erottaa raakadatan satunnainen ensimmäinen "{" JSON:n {:sta.
 Python:
 threads
 daemon
