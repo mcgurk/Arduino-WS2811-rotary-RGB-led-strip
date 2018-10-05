@@ -2,6 +2,14 @@ swap hsv->rgb rgb grb
 
 https://arduinojson.org/v5/api/jsonobject/containskey/
 
+https://github.com/bblanchon/ArduinoJson/issues/429
+
+https://www.arduino.cc/en/Serial/Peek
+DynamicJsonBuffer jsonBuffer(1024);
+JsonObject& root = jsonBuffer.parseObject(Serial);
+const char* sensor = root["sensor"];
+Serial.println(sensor);
+
 Python:
 threads
 daemon
@@ -11,8 +19,6 @@ mikrofoni
 ir
 
 https://learn.adafruit.com/memories-of-an-arduino/measuring-free-memory
-
-https://github.com/bblanchon/ArduinoJson/issues/429
 
 {"mode":"rainbow"}
 {"mode":"rainbo"}
