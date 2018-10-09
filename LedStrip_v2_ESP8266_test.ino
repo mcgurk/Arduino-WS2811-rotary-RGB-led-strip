@@ -10,11 +10,11 @@
 //#define MAX_PIXELS 300
 
 //#define MAX_BRIGHTNESS 128
-//#define MAX_BRIGHTNESS 255
-#define MAX_BRIGHTNESS 5
+#define MAX_BRIGHTNESS 255
+//#define MAX_BRIGHTNESS 5
 
 #define ESP
-#define VERSION "0.0.4"
+#define VERSION "0.0.7"
 
 //#define DEBUG
 
@@ -35,14 +35,9 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 
 const uint8_t PixelPin = 2; //doesn't matter on ESP8266. Allways GPIO3/RX
 
-uint16_t PixelCount;
 uint16_t maxchars;
 uint16_t frame;
 uint32_t micros_start = micros(), micros_end, micros_diff;
-uint8_t mode;
-uint8_t brightness;
-float speed = 2;
-float periods = 2;
 uint8_t fading = 1;
 
 #define MODE_OFF 0
@@ -58,14 +53,17 @@ struct Effect {
   float speed;
   float periods;
   uint8_t fading;
-};
+} effect;
 
-void ensureVariableSanity() {
-  if (PixelCount > MAX_PIXELS) PixelCount = MAX_PIXELS;
-  if (PixelCount < 4) PixelCount = MAX_PIXELS;
-  if (mode > BIGGEST_MODE_NUMBER) mode = 1;
-  if (brightness == 0) brightness = MAX_BRIGHTNESS;
-  maxchars = PixelCount*3;
+void ensureEffectSanity() {
+  if (effect.pixels > MAX_PIXELS) effect.pixels = MAX_PIXELS;
+  if (effect.pixels < 4) effect.pixels = 4;
+  if (effect.mode > BIGGEST_MODE_NUMBER) effect.mode = 1;
+  if (effect.brightness == 0) effect.brightness = MAX_BRIGHTNESS;
+  if (effect.periods == 0) effect.periods = 1;
+  if (effect.speed == 0) effect.speed = 1;
+  if (effect.fading != 1) effect.fading = 0;
+  maxchars = effect.pixels*3;
 }
 
 #ifdef DEBUG
@@ -97,15 +95,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
             break;
         case WStype_TEXT:
             Serial.printf("[%u] get Text: %s\n", num, payload);
-            if(payload[0] == '#') {
+            /*if(payload[0] == '#') {
                 // we get RGB data
                 // decode rgb data
                 uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
-                /*analogWrite(LED_RED,    ((rgb >> 16) & 0xFF));
+                analogWrite(LED_RED,    ((rgb >> 16) & 0xFF));
                 analogWrite(LED_GREEN,  ((rgb >> 8) & 0xFF));
-                analogWrite(LED_BLUE,   ((rgb >> 0) & 0xFF));*/
-            }
-            handleMessage(payload);
+                analogWrite(LED_BLUE,   ((rgb >> 0) & 0xFF));
+            }*/
+            //StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
+            DynamicJsonBuffer jsonBuffer(255); //ArduinoJson 5
+            JsonObject& root = jsonBuffer.parseObject(payload);
+            parseStripParameters(root);
             break;
     }
 }
@@ -135,10 +136,14 @@ void setup() {
   Serial.println("Running...");
   DBG_MSG("DEBUG!");
 
-  EEPROM.get(0, PixelCount);
-  EEPROM.get(2, mode);
-  EEPROM.get(3, brightness);
-  ensureVariableSanity();
+  #ifdef ESP
+  EEPROM.begin(1536);
+  #endif
+  EEPROM.get(1024, effect);
+  #ifdef ESP
+  EEPROM.end();
+  #endif
+  ensureEffectSanity();
   
   /*for(uint16_t i = 0; i < PixelCount; i++) {
     float c = ((float)i) / ((float)PixelCount);
@@ -152,12 +157,7 @@ void setup() {
   clearStrip();
   
   frame = 0;
-  fading = 1;
-
-  Serial.print("PixelCount:"); Serial.println(PixelCount);
-  Serial.print("mode:"); Serial.println(mode);
-  Serial.print("brightness:"); Serial.println(brightness);
-  FREERAM_PRINT;
+  fading = effect.fading;
 
   #ifdef ESP
   IAS.begin('L'); // Optional parameter: What to do with EEPROM on First boot of the app? 'F' Fully erase | 'P' Partial erase(default) | 'L' Leave intact
@@ -167,6 +167,8 @@ void setup() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   #endif
+
+  printStatus();
   
 }
 
@@ -188,12 +190,11 @@ void loop() {
 
   uint16_t value = handleFading();
   
-  if (mode == MODE_RAINBOW) {
-    uint16_t hue_moving = (((float)(frame))*speed)/((float)PixelCount) * HSV_HUE_MAX;
-    float hue_mul = HSV_HUE_MAX/(((float)PixelCount)/periods);
+  if (effect.mode == MODE_RAINBOW) {
+    uint16_t hue_moving = (((float)(frame))*effect.speed)/((float)effect.pixels) * HSV_HUE_MAX;
+    float hue_mul = HSV_HUE_MAX/(((float)effect.pixels)/effect.periods);
     uint8_t *ptr = strip.Pixels();
-    ///uint8_t r,g,b;
-    for (uint16_t i = 0; i < PixelCount; i++) {
+    for (uint16_t i = 0; i < effect.pixels; i++) {
       uint16_t hue_temp = ((float)i)*hue_mul;
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
       fast_hsv2rgb_32bit(hue, 255, value, ptr++, ptr++, ptr++);
@@ -203,7 +204,7 @@ void loop() {
     strip.Show();
   }
 
-  if (mode == MODE_BINARY || mode == MODE_OFF) {
+  if (effect.mode == MODE_BINARY || effect.mode == MODE_OFF) {
     //delay(25);
     delay(4);
   }
@@ -211,7 +212,7 @@ void loop() {
   pollSerial();
 
   frame++;
-  if (frame == (PixelCount/speed)) {
+  if (frame == (effect.pixels/effect.speed)) {
     frame = 0;
     fading = 0;
     //Serial.println("frame0");
@@ -229,17 +230,21 @@ uint16_t handleFading() {
     value = gamma.R;
     //value = pow((double)frame, 3.0) / 8000.0;
   } else {
-    value = brightness;
+    value = effect.brightness;
   }
-  if (value >= brightness) {
-    value = brightness;
+  if (value >= effect.brightness) {
+    value = effect.brightness;
     fading = 0;
   }
   return value;
 }
 
-#define IF(a) if (root.containsKey(a))
-#define IF(a,b) if (root.containsKey(a)) if (!strcmp(root[a],b))
+// https://arduinojson.org/v5/api/jsonobject/containskey/
+#define IFKEY(a) if (root.containsKey(a))
+#define IF(a,b) IFKEY(a) if (!strcmp(root[a],b))
+//#define IF(a,b) if (root.containsKey(a)) if (!strcmp(root[a],b))
+//#define IFKEY(a) if (root[a]) //doesn't work!?
+//#define IF(a,b) if (root[a]) if (!strcmp(root[a],b))
 
 void pollSerial() {
   if (!Serial.available()) return;
@@ -247,7 +252,7 @@ void pollSerial() {
     //Serial.println("BINARY");
     //Serial.println(Serial.read());
     Serial.read(); //throw 'b' away
-    mode = MODE_BINARY;
+    effect.mode = MODE_BINARY;
     char *ptr = (char*)strip.Pixels();
     uint16_t cnt = Serial.readBytes(ptr, maxchars);
     strip.Dirty();
@@ -263,117 +268,47 @@ void pollSerial() {
       return;
     }
     JsonObject root = doc.as<JsonObject>();*/
-    /*StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
-    JsonObject& root = jsonBuffer.parseObject(ptr);*/
-    DynamicJsonBuffer jsonBuffer(255); //ArduinoJson5
+    //StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
+    DynamicJsonBuffer jsonBuffer(255); //ArduinoJson 5
     JsonObject& root = jsonBuffer.parseObject(Serial);
-    // Test if parsing succeeds.
-    if (!root.success()) {
-      Serial.println("parseObject() failed");
-      return;
-    }
-    if (root["mode"]) { Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\""); }
-    if (root["pixels"]) {
-      PixelCount = root["pixels"];
-      Serial.println("PIXELS!");
-    }
-    IF("mode", "off") {
-      frame = 0;
-      mode = MODE_OFF;
-      Serial.println("OFFMODE!");
-      strip.ClearTo(RgbColor(0));
-      strip.Show();
-    }
-    IF("mode", "rainbow") {
-      frame = 0;
-      mode = MODE_RAINBOW;
-      Serial.println("RAINBOWMODE!");
-    }
-    IF("mode", "fill") {
-      mode = MODE_FILL;
-      uint8_t r = root["r"], g = root["g"], b = root["b"];
-      strip.ClearTo(RgbColor(r,g,b));
-      strip.Show();
-      Serial.println("FILLMODE!");
-    }
-    if (root["a"]) { //for Node-RED color picker, which sends r, g, b, a
-      mode = MODE_FILL;
-      uint8_t r = root["r"], g = root["g"], b = root["b"];
-      RgbColor gamma = colorGamma.Correct(RgbColor(r, g, b));
-      //strip.ClearTo(RgbColor(r,g,b));
-      strip.ClearTo(gamma);
-      strip.Show();
-      Serial.println("FILLMODE-A!");
-    }
-    IF("mode", "binary") {
-      mode = MODE_BINARY;
-      Serial.println("BINARYMODE!");
-    }
-    if (root["brightness"]) {
-      brightness = root["brightness"];
-      Serial.println("BRIGHTNESS!");
-    }
-    if (root["speed"]) {
-      speed = root["speed"];
-      Serial.println("SPEED!");
-    }
-    if (root["periods"]) {
-      periods = root["periods"];
-      Serial.println("PERIODS!");
-    }
-    IF("fading", "true") fading = 1; else fading = 0;
-    IF("save", "true") {
-      EEPROM.put(0, PixelCount);
-      EEPROM.put(2, mode);
-      EEPROM.put(3, brightness);
-      Serial.println("SAVE!");
-    }
-    ensureVariableSanity();
-    Serial.print("PixelCount:"); Serial.println(PixelCount);
-    Serial.print("mode:"); Serial.println(mode);
-    Serial.print("brightness:"); Serial.println(brightness);
-    Serial.print("frame:"); Serial.println(frame);
-    FREERAM_PRINT;
+    parseStripParameters(root);
   }
 
 }
 
-void handleMessage(uint8_t *ptr) {
-    StaticJsonBuffer<300> jsonBuffer; //ArduinoJson 5
-    //JsonObject& root = jsonBuffer.parseObject(ptr);
-    //DynamicJsonBuffer jsonBuffer(255); //ArduinoJson5
-    JsonObject& root = jsonBuffer.parseObject(ptr);
-    //JsonObject& root = jsonBuffer.parseObject(Serial);
+void parseStripParameters(JsonObject& root) {
     // Test if parsing succeeds.
     if (!root.success()) {
       Serial.println("parseObject() failed");
       return;
     }
-    if (root["mode"]) { Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\""); }
-    if (root["pixels"]) {
-      PixelCount = root["pixels"];
+    IFKEY("mode") { 
+      Serial.print("Got mode:\""); Serial.print((const char*)root["mode"]); Serial.println("\""); 
+    }
+    IFKEY("pixels") {
+      effect.pixels = root["pixels"];
       Serial.println("PIXELS!");
     }
     IF("mode", "off") {
       frame = 0;
-      mode = MODE_OFF;
+      effect.mode = MODE_OFF;
       Serial.println("OFFMODE!");
       clearStrip();
     }
     IF("mode", "rainbow") {
       frame = 0;
-      mode = MODE_RAINBOW;
+      effect.mode = MODE_RAINBOW;
       Serial.println("RAINBOWMODE!");
     }
     IF("mode", "fill") {
-      mode = MODE_FILL;
+      effect.mode = MODE_FILL;
       uint8_t r = root["r"], g = root["g"], b = root["b"];
       strip.ClearTo(RgbColor(r,g,b));
       strip.Show();
       Serial.println("FILLMODE!");
     }
-    if (root["a"]) { //for Node-RED color picker, which sends r, g, b, a
-      mode = MODE_FILL;
+    IFKEY("a") { //for Node-RED color picker, which sends r, g, b, a
+      effect.mode = MODE_FILL;
       uint8_t r = root["r"], g = root["g"], b = root["b"];
       RgbColor gamma = colorGamma.Correct(RgbColor(r, g, b));
       //strip.ClearTo(RgbColor(r,g,b));
@@ -382,34 +317,49 @@ void handleMessage(uint8_t *ptr) {
       Serial.println("FILLMODE-A!");
     }
     IF("mode", "binary") {
-      mode = MODE_BINARY;
+      effect.mode = MODE_BINARY;
       Serial.println("BINARYMODE!");
     }
-    if (root["brightness"]) {
-      brightness = root["brightness"];
+    IFKEY("brightness") {
+      effect.brightness = root["brightness"];
       Serial.println("BRIGHTNESS!");
     }
-    if (root["speed"]) {
-      speed = root["speed"];
+    IFKEY("speed") {
+      effect.speed = root["speed"];
       Serial.println("SPEED!");
     }
-    if (root["periods"]) {
-      periods = root["periods"];
+    IFKEY("periods") {
+      effect.periods = root["periods"];
       Serial.println("PERIODS!");
     }
-    IF("fading", "true") fading = 1; else fading = 0;
+    IF("fading", "true") {
+      effect.fading = 1;
+      fading = 1;
+    } else {
+      effect.fading = 0;
+      fading = 0;
+    }
     IF("save", "true") {
-      EEPROM.put(0, PixelCount);
-      EEPROM.put(2, mode);
-      EEPROM.put(3, brightness);
+      #ifdef ESP
+      EEPROM.begin(1536);
+      #endif
+      EEPROM.put(1024, effect);
+      #ifdef ESP
+      EEPROM.end();
+      #endif
       Serial.println("SAVE!");
     }
-    ensureVariableSanity();
-    Serial.print("PixelCount:"); Serial.println(PixelCount);
-    Serial.print("mode:"); Serial.println(mode);
-    Serial.print("brightness:"); Serial.println(brightness);
-    Serial.print("frame:"); Serial.println(frame);
-    FREERAM_PRINT;
+    IFKEY("load") {
+      #ifdef ESP
+      EEPROM.begin(1536);
+      #endif
+      EEPROM.get(1024, effect);
+      #ifdef ESP
+      EEPROM.end();
+      #endif
+    }
+    ensureEffectSanity();
+    printStatus();
 }
 
 void clearStrip() {
@@ -417,6 +367,17 @@ void clearStrip() {
   strip.Show();
 }
 
+void printStatus() {
+  Serial.print("PixelCount:"); Serial.println(effect.pixels);
+  Serial.print("mode:"); Serial.println(effect.mode);
+  Serial.print("brightness:"); Serial.println(effect.brightness);
+  Serial.print("speed:"); Serial.println(effect.speed);
+  Serial.print("periods:"); Serial.println(effect.periods);
+  Serial.print("fading:"); Serial.println(effect.fading);
+  Serial.print("frame:"); Serial.println(frame);
+  FREERAM_PRINT;
+}
+  
 /*
  * fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b)
  */
