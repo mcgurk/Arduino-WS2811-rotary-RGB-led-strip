@@ -307,14 +307,23 @@ void parseStripParameters(JsonObject& root) {
       strip.Show();
       Serial.println("FILLMODE!");
     }
-    IFKEY("a") { //for Node-RED color picker, which sends r, g, b, a
+    IFKEY("r") IFKEY("g") IFKEY("b") {
       effect.mode = MODE_FILL;
       uint8_t r = root["r"], g = root["g"], b = root["b"];
       RgbColor gamma = colorGamma.Correct(RgbColor(r, g, b));
       //strip.ClearTo(RgbColor(r,g,b));
       strip.ClearTo(gamma);
       strip.Show();
-      Serial.println("FILLMODE-A!");
+      Serial.println("FILLMODE-RGB-GAMMA!");
+    }
+    IFKEY("h") IFKEY("s") IFKEY("l") {
+      effect.mode = MODE_FILL;
+      float h = root["h"], s = root["s"], l = root["l"];
+      RgbColor c = HslColor(h/360.0f, s, l/2.0f);
+      RgbColor gamma = colorGamma.Correct(c);
+      strip.ClearTo(gamma);
+      strip.Show();
+      Serial.println("FILLMODE-HSL-GAMMA!");
     }
     IF("mode", "binary") {
       effect.mode = MODE_BINARY;
