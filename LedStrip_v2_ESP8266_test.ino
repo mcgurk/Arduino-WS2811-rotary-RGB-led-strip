@@ -14,7 +14,7 @@
 //#define MAX_BRIGHTNESS 5
 
 #define ESP
-#define VERSION "0.0.7"
+#define VERSION "0.0.8"
 
 //#define DEBUG
 
@@ -44,7 +44,8 @@ uint8_t fading = 1;
 #define MODE_RAINBOW 1
 #define MODE_FILL 2
 #define MODE_BINARY 3
-#define BIGGEST_MODE_NUMBER 3
+#define MODE_VUMETER 4
+#define BIGGEST_MODE_NUMBER 4
 
 struct Effect {
   uint16_t pixels;
@@ -53,6 +54,7 @@ struct Effect {
   float speed;
   float periods;
   uint8_t fading;
+  RgbColor color;
 } effect;
 
 void ensureEffectSanity() {
@@ -208,6 +210,15 @@ void loop() {
     //delay(25);
     delay(4);
   }
+
+  if (effect.mode == MODE_VUMETER) {
+    #define SENSORPIN A0
+    int sensorValue = analogRead(SENSORPIN);
+    strip.ClearTo(RgbColor(0));
+    strip.ClearTo(effect.color, 0, sensorValue * effect.pixels / 1023);
+    strip.Show();
+    delay(4);
+  }
   
   pollSerial();
 
@@ -300,19 +311,25 @@ void parseStripParameters(JsonObject& root) {
       effect.mode = MODE_RAINBOW;
       Serial.println("RAINBOWMODE!");
     }
+    IF("mode", "vumeter") {
+      frame = 0;
+      effect.mode = MODE_VUMETER;
+      Serial.println("VUMETERMODE!");
+    }
     IF("mode", "fill") {
       effect.mode = MODE_FILL;
       uint8_t r = root["r"], g = root["g"], b = root["b"];
-      strip.ClearTo(RgbColor(r,g,b));
+      effect.color = RgbColor(r,g,b);
+      strip.ClearTo(effect.color);
       strip.Show();
       Serial.println("FILLMODE!");
     }
     IFKEY("r") IFKEY("g") IFKEY("b") {
       effect.mode = MODE_FILL;
       uint8_t r = root["r"], g = root["g"], b = root["b"];
-      RgbColor gamma = colorGamma.Correct(RgbColor(r, g, b));
+      effect.color = colorGamma.Correct(RgbColor(r, g, b));
       //strip.ClearTo(RgbColor(r,g,b));
-      strip.ClearTo(gamma);
+      strip.ClearTo(effect.color);
       strip.Show();
       Serial.println("FILLMODE-RGB-GAMMA!");
     }
@@ -320,8 +337,8 @@ void parseStripParameters(JsonObject& root) {
       effect.mode = MODE_FILL;
       float h = root["h"], s = root["s"], l = root["l"];
       RgbColor c = HslColor(h/360.0f, s, l/2.0f);
-      RgbColor gamma = colorGamma.Correct(c);
-      strip.ClearTo(gamma);
+      effect.color = colorGamma.Correct(c);
+      strip.ClearTo(effect.color);
       strip.Show();
       Serial.println("FILLMODE-HSL-GAMMA!");
     }
