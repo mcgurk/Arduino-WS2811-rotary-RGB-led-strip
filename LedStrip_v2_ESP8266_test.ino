@@ -14,7 +14,7 @@
 //#define MAX_BRIGHTNESS 5
 
 #define ESP
-#define VERSION "0.0.9"
+#define VERSION "0.1.0"
 
 //#define DEBUG
 
@@ -36,7 +36,7 @@ WebSocketsServer webSocket = WebSocketsServer(81);
 const uint8_t PixelPin = 2; //doesn't matter on ESP8266. Allways GPIO3/RX
 
 uint16_t maxchars;
-uint16_t frame;
+uint32_t frame;
 uint32_t micros_start = micros(), micros_end, micros_diff;
 uint8_t fading = 1;
 
@@ -63,7 +63,7 @@ void ensureEffectSanity() {
   if (effect.mode > BIGGEST_MODE_NUMBER) effect.mode = 1;
   if (effect.brightness == 0) effect.brightness = MAX_BRIGHTNESS;
   if (effect.periods == 0) effect.periods = 1;
-  if (effect.speed == 0) effect.speed = 1;
+  //if (effect.speed == 0) effect.speed = 1;
   if (effect.fading != 1) effect.fading = 0;
   maxchars = effect.pixels*3;
 }
@@ -207,8 +207,8 @@ void loop() {
   }
 
   if (effect.mode == MODE_BINARY || effect.mode == MODE_OFF) {
-    //delay(25);
-    delay(4);
+    //delay(4); //Arduino
+    delay(10);
   }
 
   if (effect.mode == MODE_VUMETER) {
@@ -223,11 +223,11 @@ void loop() {
   pollSerial();
 
   frame++;
-  if (frame == (effect.pixels/effect.speed)) {
+  /*if (frame == (effect.pixels/effect.speed)) {
     frame = 0;
     fading = 0;
     //Serial.println("frame0");
-  }
+  }*/
   
   //delay(20);
 }
