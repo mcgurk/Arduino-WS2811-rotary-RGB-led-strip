@@ -207,8 +207,11 @@ void loop() {
   }
 
   if (effect.mode == MODE_BINARY || effect.mode == MODE_OFF) {
-    //delay(4); //Arduino
+    #ifdef ESP
     delay(10);
+    #else
+    delay(4); //Arduino
+    #endif
   }
 
   if (effect.mode == MODE_VUMETER) {
