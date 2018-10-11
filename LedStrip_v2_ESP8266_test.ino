@@ -115,8 +115,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
 #endif
 void setup() {
   #ifdef ESP
-  IAS.preSetDeviceName("Ledstrip-wemos"); // preset deviceName this is also your MDNS responder: http://iasblink.local
-  IAS.preSetAppName(F("Ledstrip")); // preset appName
+  IAS.preSetDeviceName("ledstripESP"); // preset deviceName this is also your MDNS responder: http://iasblink.local
+  IAS.preSetAppName(F("Ledstrip App")); // preset appName
   IAS.preSetAppVersion(F(VERSION)); // preset appVersion
   IAS.preSetAutoUpdate(true); // automaticUpdate (true, false)
   Serial.begin(115200);
