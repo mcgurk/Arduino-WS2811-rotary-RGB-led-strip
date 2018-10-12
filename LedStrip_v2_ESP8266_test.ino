@@ -14,7 +14,7 @@
 //#define MAX_BRIGHTNESS 5
 
 #define ESP
-#define VERSION "0.1.0"
+#define VERSION "0.1.2"
 
 //#define DEBUG
 
@@ -55,6 +55,8 @@ struct Effect {
   float periods;
   uint8_t fading;
   RgbColor color;
+  float phase;
+  uint16_t checksum;
 } effect;
 
 void ensureEffectSanity() {
@@ -62,7 +64,7 @@ void ensureEffectSanity() {
   if (effect.pixels < 4) effect.pixels = 4;
   if (effect.mode > BIGGEST_MODE_NUMBER) effect.mode = 1;
   if (effect.brightness == 0) effect.brightness = MAX_BRIGHTNESS;
-  if (effect.periods == 0) effect.periods = 1;
+  //if (effect.periods == 0) effect.periods = 1;
   //if (effect.speed == 0) effect.speed = 1;
   if (effect.fading != 1) effect.fading = 0;
   maxchars = effect.pixels*3;
@@ -193,8 +195,12 @@ void loop() {
   uint16_t value = handleFading();
   
   if (effect.mode == MODE_RAINBOW) {
-    uint16_t hue_moving = (((float)(frame))*effect.speed)/((float)effect.pixels) * HSV_HUE_MAX;
-    float hue_mul = HSV_HUE_MAX/(((float)effect.pixels)/effect.periods);
+    //uint16_t hue_moving = (((float)(frame))*effect.speed)/((float)effect.pixels) * HSV_HUE_MAX;
+    //uint16_t hue_moving = effect.phase;
+    uint16_t hue_moving = effect.phase * HSV_HUE_MAX;
+    float hue_mul = 0;
+    if (effect.periods != 0)
+      hue_mul = HSV_HUE_MAX/(((float)effect.pixels)/effect.periods);
     uint8_t *ptr = strip.Pixels();
     for (uint16_t i = 0; i < effect.pixels; i++) {
       uint16_t hue_temp = ((float)i)*hue_mul;
@@ -226,6 +232,9 @@ void loop() {
   pollSerial();
 
   frame++;
+  effect.phase += effect.speed;
+  //effect.phase = fmod(effect.phase, HSV_HUE_MAX);
+  effect.phase = fmod(effect.phase, 1.0f);
   /*if (frame == (effect.pixels/effect.speed)) {
     frame = 0;
     fading = 0;
@@ -304,7 +313,6 @@ void parseStripParameters(JsonObject& root) {
       Serial.println("PIXELS!");
     }
     IF("mode", "off") {
-      frame = 0;
       effect.mode = MODE_OFF;
       Serial.println("OFFMODE!");
       clearStrip();
@@ -360,6 +368,10 @@ void parseStripParameters(JsonObject& root) {
     IFKEY("periods") {
       effect.periods = root["periods"];
       Serial.println("PERIODS!");
+    }
+    IFKEY("phase") {
+      effect.phase = root["phase"];
+      Serial.println("PHASE!");
     }
     IF("fading", "true") {
       effect.fading = 1;
