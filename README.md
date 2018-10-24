@@ -21,7 +21,9 @@
 
 Fast HSV -> RGB taken from here: http://www.vagrearg.org/content/hsvrgb
 
-Can't use assembler version:
+### Arduino IDE, fast_hsv2rgb, optimization level
+
+Can't use assembler version with fast hsv2rgb:
 ```
 error: r28 cannot be used in asm here
 error: r29 cannot be used in asm here
@@ -33,6 +35,7 @@ Found:
 C:\Program Files (x86)\Arduino\hardware\arduino\avr\platform.txt
 compiler.cpp.flags: -OS -> -O1
 ```
+https://docs.oracle.com/cd/E37670_01/E52461/html/ch04s03.html
 
 ### Python
 
