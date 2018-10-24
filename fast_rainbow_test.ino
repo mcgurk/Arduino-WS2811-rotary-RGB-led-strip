@@ -11,8 +11,8 @@
 #include "fast_hsv2rgb.c"
 
 #define MAX_PIXELS 100
-#define MAX_BRIGHTNESS 20
-#define SPEED 1.0f
+#define MAX_BRIGHTNESS 128
+#define SPEED 6.0f
 #define PERIODS 2.0f
 // (100 ledstrip: 100, 255, 0.1, 1)
 // (300 ledstrip: 300, 128, 2, 2)
