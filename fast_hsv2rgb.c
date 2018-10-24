@@ -1,5 +1,9 @@
 // http://www.vagrearg.org/content/hsvrgb
 
+// Arduino IDE!!!:
+// C:\Program Files (x86)\Arduino\hardware\arduino\avr\platform.txt
+// compiler.cpp.flags: -OS -> -O1
+
 #ifndef __HSV_FAST_HSV2RGB_H__
 #define __HSV_FAST_HSV2RGB_H__
 
