@@ -28,6 +28,12 @@ error: r29 cannot be used in asm here
 ```
 Google says that works with optimization level 1, but I don't know easy way to change optimization level.
 
+Found:
+```
+C:\Program Files (x86)\Arduino\hardware\arduino\avr\platform.txt
+compiler.cpp.flags: -OS -> -O1
+```
+
 ### Python
 
 #### Prepare python, if needed
