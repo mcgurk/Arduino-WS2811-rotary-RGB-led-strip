@@ -37,6 +37,8 @@ compiler.cpp.flags: -OS -> -O1
 ```
 https://docs.oracle.com/cd/E37670_01/E52461/html/ch04s03.html
 
+Can't still get it work :(. Returns allways only zeros.
+
 ### Python
 
 #### Prepare python, if needed
