@@ -1,10 +1,7 @@
 // https://github.com/Makuna/NeoPixelBus
 // https://github.com/Makuna/NeoPixelBus/wiki/NeoPixelBus-object-API
 // https://github.com/Makuna/NeoPixelBus/wiki/HslColor-object-API
-
-// Arduino IDE!!!:
-// C:\Program Files (x86)\Arduino\hardware\arduino\avr\platform.txt
-// compiler.cpp.flags: -OS -> -O1
+// http://www.vagrearg.org/content/hsvrgb
 
 #include <NeoPixelBus.h>
 #include "fast_hsv2rgb.c"
