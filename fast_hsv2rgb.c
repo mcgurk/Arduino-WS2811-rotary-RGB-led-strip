@@ -22,8 +22,8 @@ void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g
 #define HSV_VAL_MAX   255
 
 /* Options: */
-#define HSV_USE_SEXTANT_TEST  /* Limit the hue to 0...360 degrees */
-#define HSV_USE_ASSEMBLY  /* Optimize code using assembly */
+//#define HSV_USE_SEXTANT_TEST  /* Limit the hue to 0...360 degrees */
+//#define HSV_USE_ASSEMBLY  /* Optimize code using assembly */
 
 #ifdef __cplusplus
 extern "C" {
