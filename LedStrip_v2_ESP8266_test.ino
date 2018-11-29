@@ -14,7 +14,7 @@
 //#define MAX_BRIGHTNESS 5
 
 #define ESP
-#define VERSION "0.1.2"
+#define VERSION "0.1.3"
 
 //#define DEBUG
 
@@ -121,6 +121,7 @@ void setup() {
   IAS.preSetAppName(F("Ledstrip App")); // preset appName
   IAS.preSetAppVersion(F(VERSION)); // preset appVersion
   IAS.preSetAutoUpdate(true); // automaticUpdate (true, false)
+  IAS.preSetAutoConfig(false); //go autoconfig-mode only with button
   Serial.begin(115200);
   #else
   Serial.begin(2000000);
