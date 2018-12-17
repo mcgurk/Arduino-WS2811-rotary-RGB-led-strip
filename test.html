@@ -3,31 +3,93 @@
 <head>
 </head>
 <body>
+  <p id="demo"></p>
 
-  <p>Before the script...</p>
-
-    <canvas id="myCanvas" width="1000" height="200"></canvas>
+    <canvas id="myCanvas" width="1100" height="200"></canvas>
     <script>
-      function circle(x,y,s,c) {
-        context.beginPath();
-        context.arc(x, y, s, 0, 2 * Math.PI, false);
-        context.fillStyle = c;
-        context.fill();
-        //context.lineWidth = 5;
-        //context.strokeStyle = '#003300';
-        //context.stroke();
-      }
-      
-      var canvas = document.getElementById('myCanvas');
-      var context = canvas.getContext('2d');
-      var centerX = canvas.width / 2;
-      var centerY = canvas.height / 2;
-      var radius = 10;
-      for (var c=0; c<100; c++) circle(c*10, 100, 3, 'black');
+		var canvas = document.getElementById('myCanvas');
+		var context = canvas.getContext('2d');
+		velocity = new Array(100).fill(0.0);
+		position = new Array(100).fill(0.0);
+		//for (var c = 0; c < 100; c++) { velocity[c] = 0.0;
+		var id = setInterval(update, 20);
+		//var id2 = setInterval(droplet, 1000);
+		var id2 = setInterval(droplet, 100);
+		var frame = 0;
+		var d = false;
+	  
+		function circle(x, y, s, c) {
+			context.beginPath();
+			context.arc(x, y, s, 0, 2 * Math.PI, false);
+			context.fillStyle = c;
+			context.fill();
+			//context.lineWidth = 5;
+			//context.strokeStyle = '#003300';
+			//context.stroke();
+			//document.write(c);
+		}
+		
+		function draw() {
+			for (var c = 0; c < 100; c++) {
+				//var color = 'rgb(' + Math.floor(c*3) + ', 0, 0)';
+				//v = Math.floor(buffer[c]);
+				v = 0;
+				var color = 'rgb(' + v + ', ' + v + ', ' + v + ')';
+				circle(c * 10 + 5, 100+position[c], 3, color);
+				//circle(c * 10 + 5, 100, 3, color);
+			}
+		}
+		
+		function draw2() {
+			for (var c = 0; c < 100; c++) {
+				var v = Math.floor(position[c]*50);
+				if (v > 255) {
+					r = v - 255; g = v - 255; b = 255;
+				} else {
+					r = 0; g = 0; b = v;
+				}
+				var color = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+				circle(c * 10 + 5, 10, 3, color);
+				//circle(c * 10 + 5, 100, 3, color);
+			}
+		}
+
+		function update() {
+			/*if (d) {
+				var p = Math.floor(Math.random()*100);
+				buf[p] = 255.0*3;
+				d = false;
+			}*/
+		    dest = new Array(100);
+			for (var c = 0; c < 100; c++) {
+				if (c == 0) p1 = 100 - 1; else p1 = c - 1;
+				if (c == 99) p2 = 0; else p2 = c + 1;
+				//velocity[c] = position[p1] + position[p2]; //new velocity
+				//position[c] = position[c] + velocity[c]/100	; //new position
+				velocity[c] = (velocity[c] - position[c]*10)*0.90;
+				position[c] = position[c] + velocity[c]/100 + (position[p1] + position[p2])/30;
+				//buf[c] = c*3 + (frame%100);
+				//dest[c] = buf[c] - 1;
+				//dest[c] = buf[c]*0.5 + (buf[p1] + buf[p2])*0.255;
+				//dest[c] = dest[c] - 0.001;
+				//dest[c] = buf[c]-1;
+			}
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			draw();
+			draw2();
+			frame++;
+			//document.getElementById("demo").innerHTML = position;
+		}
+		
+		function droplet() {
+			d = true;
+			var p = Math.floor(Math.random()*100);
+			position[p] = -50;
+			//document.write(p); document.write('<br>');
+		}
 
     </script>
 
-  <p>...After the script.</p>
   
 </body>
 </html>
