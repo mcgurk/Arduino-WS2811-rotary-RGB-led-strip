@@ -66,8 +66,10 @@
 				if (c == 99) p2 = 0; else p2 = c + 1;
 				//velocity[c] = position[p1] + position[p2]; //new velocity
 				//position[c] = position[c] + velocity[c]/100	; //new position
-				velocity[c] = (velocity[c] - position[c]*10)*0.90;
-				position[c] = position[c] + velocity[c]/100 + (position[p1] + position[p2])/30;
+				//velocity[c] = (velocity[c] - position[c]*10)*0.90;
+				//position[c] = position[c] + velocity[c]/100 + (position[p1] + position[p2])/30;
+				velocity[c] = (velocity[c] - position[c]*10 + (position[p1] + position[p2]))*0.92;
+				position[c] = position[c] + velocity[c]/100;
 				//buf[c] = c*3 + (frame%100);
 				//dest[c] = buf[c] - 1;
 				//dest[c] = buf[c]*0.5 + (buf[p1] + buf[p2])*0.255;
@@ -84,7 +86,7 @@
 		function droplet() {
 			d = true;
 			var p = Math.floor(Math.random()*100);
-			position[p] = -50;
+			position[p] = -100;
 			//document.write(p); document.write('<br>');
 		}
 
