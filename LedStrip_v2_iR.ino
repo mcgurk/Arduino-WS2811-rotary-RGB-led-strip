@@ -12,6 +12,8 @@
 #define VCC 10
 IRrecv irrecv(recvPin);
 
+const uint8_t PixelPin = 2;
+
 #define MAX_PIXELS 100
 #define MAX_BRIGHTNESS 128
 
@@ -24,14 +26,17 @@ IRrecv irrecv(recvPin);
 
 #define POWER_BTN 0xFFB04F // power (red)
 #define RESET_BTN 0xFFB24D // <-/-> (yellow)
-#define SPEED_DOWN_BTN 0xFF28D7 // <-..
-#define SPEED_UP_BTN 0xFFF00F // ..->
+#define SPEED_DOWN_BTN 0xFF48B7 // <<<
+#define SPEED_UP_BTN 0xFF6897 // >>>
 #define SAVE_BTN 0xFF9867 // IC set
 #define WIDE_BTN 0xFFD827 // < | > (green)
 #define NARROW_BTN 0xFF8877 // > | < (blue)
-
-
-const uint8_t PixelPin = 2;
+#define BRIGHTNESS_UP_BTN 0xFF906F // up
+#define BRIGHTNESS_DOWN_BTN 0xFFB847 // down
+#define FLASH_BTN 0xFF00FF // Flash (turquoise)
+#define FILL_BTN 0xFF38C7 // C16
+#define COLOR_LEFT_BTN 0xFF28D7 // X*-.
+#define COLOR_RIGHT_BTN 0xFFF00F // .-*X
 
 uint16_t maxchars;
 uint32_t frame;
@@ -39,22 +44,36 @@ uint32_t frame;
 uint8_t fading = 1;
 uint8_t power = 1;
 uint32_t old_t = 0;
+uint32_t frame_duration = 0;
 
 //#define MODE_OFF 0
 #define MODE_RAINBOW 1
 #define MODE_FILL 2
 #define MODE_BINARY 3 // get values from serial port as raw binary. prefix raw data with byte 'b'.
-#define MODE_VUMETER 4
+#define MODE_BLINK 4
 #define BIGGEST_MODE_NUMBER 4
+
+
+#define HSV_HUE_SEXTANT    256
+#define HSV_HUE_STEPS   (6 * HSV_HUE_SEXTANT)
+
+#define HSV_HUE_MIN   0
+#define HSV_HUE_MAX   (HSV_HUE_STEPS - 1)
+#define HSV_SAT_MIN   0
+#define HSV_SAT_MAX   255
+#define HSV_VAL_MIN   0
+#define HSV_VAL_MAX   255
 
 struct Effect {
   uint16_t pixels;
   uint8_t mode;
-  uint8_t brightness;
+  int16_t brightness;
   float speed;
   float periods;
   uint8_t fading;
   RgbColor color;
+  float hue;
+  float saturation;
   float phase;
   uint16_t checksum;
 } effect;
@@ -63,9 +82,12 @@ void ensureEffectSanity() {
   if (effect.pixels > MAX_PIXELS) effect.pixels = MAX_PIXELS;
   if (effect.pixels < 4) effect.pixels = 4;
   if (effect.mode > BIGGEST_MODE_NUMBER) effect.mode = 1;
-  if (effect.brightness == 0) effect.brightness = MAX_BRIGHTNESS;
+  if (effect.brightness <= 0) effect.brightness = 1;
   if (effect.brightness > MAX_BRIGHTNESS) effect.brightness = MAX_BRIGHTNESS;
   if (effect.periods < 0) effect.periods = 0;
+  //if (effect.hue < 0) effect.hue = 0; if (effect.hue > 1.0f) effect.hue = 1.0f;
+  effect.hue = fmod(effect.hue, 1.0f); if (effect.hue < 0.0f) effect.hue = 1.0f - effect.hue;
+  if (effect.saturation < 0) effect.saturation = 0; if (effect.saturation > 1.0f) effect.saturation = 1.0f;
   //if (effect.speed == 0) effect.speed = 1;
   if (effect.fading != 1) effect.fading = 0;
   maxchars = effect.pixels*3;
@@ -112,23 +134,14 @@ void setup() {
   
   irrecv.enableIRIn();  // Start the receiver
 
-  for(uint16_t i = 0; i < MAX_PIXELS; i++) {
+  /*for(uint16_t i = 0; i < MAX_PIXELS; i++) {
     float c = ((float)i) / ((float)MAX_PIXELS);
     HslColor color = HslColor(c, 1.0f, 0.5f);
     strip.SetPixelColor(i, color);
   }
-  strip.Show();
+  strip.Show();*/
 }
 
-#define HSV_HUE_SEXTANT    256
-#define HSV_HUE_STEPS   (6 * HSV_HUE_SEXTANT)
-
-#define HSV_HUE_MIN   0
-#define HSV_HUE_MAX   (HSV_HUE_STEPS - 1)
-#define HSV_SAT_MIN   0
-#define HSV_SAT_MAX   255
-#define HSV_VAL_MIN   0
-#define HSV_VAL_MAX   255
 
 void loop() {
   //uint16_t value = handleFading();
@@ -143,35 +156,45 @@ void loop() {
       uint16_t hue_temp = ((float)i)*hue_mul;
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
       //fast_hsv2rgb_32bit(hue, 255, value, ptr++, ptr++, ptr++);
-      fast_hsv2rgb_32bit(hue, 255, 128, ptr++, ptr++, ptr++);
+      fast_hsv2rgb_32bit(hue, 255, effect.brightness, ptr++, ptr++, ptr++);
     }
     strip.Dirty();
     if (irrecv.isIdle()) strip.Show();
     //strip.Show();
   }
-/*
-  if (effect.mode == MODE_BINARY || effect.mode == MODE_OFF) {
-    delay(4); //Arduino
+
+  if (effect.mode == MODE_FILL && power) {
+    HslColor color = HslColor(effect.hue, 1.0f, effect.brightness/255.0f);
+    strip.ClearTo(color);
+    if (irrecv.isIdle()) strip.Show();
+  }
+  
+  if (effect.mode == MODE_BLINK && power) {
+    uint8_t *ptr = strip.Pixels();
+    uint8_t value = frame_duration / 5000;
+    for (uint16_t i = 0; i < effect.pixels*3; i++) {
+      if ((ptr[i] - value) > 0) ptr[i] -= value; else ptr[i] = 0;
+    }
+    strip.Dirty();
+    if (effect.speed < 6) effect.speed = 6;
+    uint8_t new_blink = frame%(300/(uint32_t)effect.speed);
+    if (new_blink == 0) {
+      HslColor color = HslColor(0.0f, 0.0f, effect.brightness/255.0f);
+      strip.SetPixelColor(random(effect.pixels), color);
+    }
+    if (irrecv.isIdle()) strip.Show();
   }
 
-  if (effect.mode == MODE_VUMETER && power) {
-    #define SENSORPIN A0
-    int sensorValue = analogRead(SENSORPIN);
-    strip.ClearTo(RgbColor(0));
-    strip.ClearTo(effect.color, 0, sensorValue * effect.pixels / 1023);
-    strip.Show();
-    delay(4);
-  }
-*/  
+  delay(10);
+
   pollSerial();
 
   frame++;
-  effect.phase += effect.speed/((float)(micros()-old_t));
+  frame_duration = micros()-old_t;
+  effect.phase += effect.speed/((float)frame_duration);
   old_t = micros();
   effect.phase = fmod(effect.phase, 1.0f);
   if (effect.phase < 0.0f) effect.phase = 1.0f - effect.phase;
-
-  //delay(4);
 
   decode_results results;        // Somewhere to store the results
   if (irrecv.decode(&results)) {  // Grab an IR code
@@ -199,17 +222,18 @@ void processCommand(uint32_t cmd) {
       effect.mode = MODE_RAINBOW;
       effect.speed = 6.0f;
       effect.periods = 1.0f;
+      effect.phase = 0.0f;
       effect.brightness = MAX_BRIGHTNESS;
       power = 1;
       debug("RESET_BTN");
       break;
     case SPEED_DOWN_BTN:
-      effect.speed -= 3.0f;
+      effect.speed -= 6.0f;
       debug("SPEED_DOWN_BTN");
       debug(effect.speed);
       break;
     case SPEED_UP_BTN:
-      effect.speed += 3.0f;
+      effect.speed += 6.0f;
       debug("SPEED_UP_BTN");
       debug(effect.speed);
       break;
@@ -225,11 +249,45 @@ void processCommand(uint32_t cmd) {
       effect.periods += 1.0f;
       debug("NARROW_BTN");
       break;
+    case BRIGHTNESS_UP_BTN:
+      effect.brightness += 10;
+      debug("BRIGHTNESS_UP_BTN");
+      break;
+    case BRIGHTNESS_DOWN_BTN:
+      effect.brightness -= 10;
+      debug("BRIGHTNESS_DOWN_BTN");
+      break;
+    case FLASH_BTN:
+      effect.mode = MODE_BLINK;
+      /*HslColor color = HslColor(0.0f, 0.0f, 0.5f);
+      strip.SetPixelColor(random(effect.pixels), color);
+      strip.Show();*/
+      debug("FLASH_BTN");
+      break;
+    case FILL_BTN:
+      effect.mode = MODE_FILL;
+      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
+      debug("FILL_BTN");
+      break;
+    case COLOR_LEFT_BTN:
+      effect.hue -= 0.05;
+      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
+      debug("COLOR_LEFT_BTN");
+      break;
+    case COLOR_RIGHT_BTN:
+      effect.hue += 0.05;
+      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
+      debug("COLOR_RIGHT_BTN");
+      break;
   }
   ensureEffectSanity();
   //printStatus();
 }
 
+/*HslColor color = HslColor(0.0f, 0.0f, 0.5f);
+      strip.SetPixelColor(random(effect.pixels), color);
+      strip.Show();*/
+      
 uint16_t handleFading() {
   uint16_t value;
   if (fading) {
@@ -362,8 +420,13 @@ void pollSerial() {
 
 void clearStrip() {
   strip.ClearTo(RgbColor(0));
-  strip.Show();
+  if (irrecv.isIdle()) strip.Show();
 }
+
+/*void clearStrip(HslColor color) {
+  strip.ClearTo(color);
+  if (irrecv.isIdle()) strip.Show();
+}*/
 
 void printStatus() {
   Serial.print("PixelCount:"); Serial.println(effect.pixels);
