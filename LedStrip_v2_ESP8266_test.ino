@@ -43,7 +43,7 @@ uint8_t fading = 1;
 #define MODE_OFF 0
 #define MODE_RAINBOW 1
 #define MODE_FILL 2
-#define MODE_BINARY 3
+#define MODE_BINARY 3 // get values from serial port as raw binary. prefix raw data with byte 'b'.
 #define MODE_VUMETER 4
 #define BIGGEST_MODE_NUMBER 4
 
