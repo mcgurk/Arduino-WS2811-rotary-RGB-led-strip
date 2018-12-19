@@ -41,7 +41,7 @@ void loop() {
   strip.Show();
 
   frame++;
-  phase += SPEED/((float)(micros()-old_t));
+  phase += VELOCITY/((float)(micros()-old_t));
   old_t = micros();
   phase = fmod(phase, 1.0f);
 }
