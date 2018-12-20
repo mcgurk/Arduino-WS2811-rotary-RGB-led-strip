@@ -36,14 +36,16 @@ const uint8_t PixelPin = 2;
 #define BRIGHTNESS_DOWN_BTN 0xFFB847 // down
 #define FLASH_BTN 0xFF00FF // Flash (turquoise)
 #define FILL_BTN 0xFFB24D // <-/-> (yellow)
-#define COLOR_LEFT_BTN 0xFF28D7 // X*-.
-#define COLOR_RIGHT_BTN 0xFFF00F // .-*X
+#define HUE_LEFT_BTN 0xFF28D7 // X*-.
+#define HUE_RIGHT_BTN 0xFFF00F // .-*X
 #define TRAVELLER_BTN 0xFF30CF // Meteor
 #define GLITTER_BTN 0xFF58A7 // Jump
 #define ZERO_SATURATION_BTN 0xFF38C7 // C16
 #define LOW_SATURATION_BTN 0xFF50AF // C7
 #define HIGH_SATURATION_BTN 0xFF02FD // C3
 #define FULL_SATURATION_BTN 0xFFE817 // CS
+#define VARIATION_LEFT_BTN 0xFF32CD // <*
+#define VARIATION_RIGHT_BTN 0xFF20DF // *>
 
 uint16_t maxchars;
 uint32_t frame;
@@ -61,6 +63,9 @@ uint32_t frame_duration = 0;
 #define MODE_GLITTER 5
 #define BIGGEST_MODE_NUMBER 5
 
+#define VARIATION_SINGLE 1
+#define VARIATION_RAINBOW 2
+#define VARIATION_PALETTE 3
 
 #define HSV_HUE_SEXTANT    256
 #define HSV_HUE_STEPS   (6 * HSV_HUE_SEXTANT)
@@ -83,13 +88,12 @@ struct Effect {
   float hue;
   float saturation;
   float phase;
-  //float position;
+  uint8_t variation;
   uint16_t checksum;
 } effect;
 
 uint8_t buf1[MAX_PIXELS];
 uint32_t buf2[MAX_PIXELS];
-//uint8_t buf2[MAX_PIXELS];
 
 void ensureEffectSanity() {
   if (effect.pixels > MAX_PIXELS) effect.pixels = MAX_PIXELS;
@@ -98,12 +102,9 @@ void ensureEffectSanity() {
   if (effect.brightness <= 0) effect.brightness = 1;
   if (effect.brightness > MAX_BRIGHTNESS) effect.brightness = MAX_BRIGHTNESS;
   if (effect.periods < 0) effect.periods = 0;
-  //if (effect.hue < 0) effect.hue = 0; if (effect.hue > 1.0f) effect.hue = 1.0f;
   effect.hue = fmod(effect.hue, 1.0f); if (effect.hue < 0.0f) effect.hue = 1.0f - effect.hue;
   if (effect.saturation < 0) effect.saturation = 0; if (effect.saturation > 1.0f) effect.saturation = 1.0f;
-  //if (effect.speed == 0) effect.speed = 1;
   if (effect.fading != 1) effect.fading = 0;
-  //if (effect.position >= effect.pixels) effect.position = effect.pixels - 1; if (effect.position < 0) effect.position = 0;
   maxchars = effect.pixels*3;
 }
 
@@ -170,18 +171,17 @@ void loop() {
     for (uint16_t i = 0; i < effect.pixels; i++) {
       uint16_t hue_temp = ((float)i)*hue_mul;
       uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-      //fast_hsv2rgb_32bit(hue, 255, value, ptr++, ptr++, ptr++);
       fast_hsv2rgb_32bit(hue, effect.saturation*255, effect.brightness, ptr++, ptr++, ptr++);
     }
     strip.Dirty();
     if (irrecv.isIdle()) strip.Show();
-    //strip.Show();
   }
 
   if (effect.mode == MODE_FILL && power) {
     HslColor color = HslColor(effect.hue, effect.saturation, effect.brightness/255.0f);
     strip.ClearTo(color);
     if (irrecv.isIdle()) strip.Show();
+    delay(100);
   }
   
   if (effect.mode == MODE_BLINK && power) {
@@ -191,10 +191,14 @@ void loop() {
       if ((ptr[i] - value) > 0) ptr[i] -= value; else ptr[i] = 0;
     }
     strip.Dirty();
-    if (effect.speed < 1) effect.speed = 1;
-    uint8_t new_blink = frame%(50/(uint32_t)effect.speed);
+    if (effect.periods < 1) effect.periods = 1;
+    uint8_t new_blink = frame%(50/(uint32_t)effect.periods);
     if (new_blink == 0) {
-      HsbColor color = HsbColor(effect.hue, effect.saturation, effect.brightness/255.0f);
+      HsbColor color;
+      if (effect.variation == VARIATION_SINGLE) 
+        color = HsbColor(effect.hue, effect.saturation, effect.brightness/255.0f);
+      else
+        color = HsbColor((float)(frame%1000)/1000, effect.saturation, effect.brightness/255.0f);
       strip.SetPixelColor(random(effect.pixels), color);
     }
     if (irrecv.isIdle()) strip.Show();
@@ -208,7 +212,11 @@ void loop() {
     }
     strip.Dirty();
     uint16_t p = (uint32_t)(frame*effect.speed/20) % effect.pixels;
-    HslColor color = HslColor(effect.hue, effect.saturation, effect.brightness/255.0f);
+    HslColor color;
+    if (effect.variation == VARIATION_SINGLE)
+      color = HslColor(effect.hue, effect.saturation, effect.brightness/255.0f);
+    else
+      color = HslColor((float)(frame%1000)/1000, effect.saturation, effect.brightness/255.0f);
     strip.SetPixelColor(p, color);
     if (irrecv.isIdle()) strip.Show();
   }
@@ -221,45 +229,31 @@ void loop() {
     }*/
     uint8_t *ptr = strip.Pixels();
     for (uint16_t i = 0; i < effect.pixels; i++) {
-      //buf1[i] = ((uint16_t)ptr[i]+(uint16_t)ptr[i+1]+(uint16_t)ptr[i+2]) / 3;
       buf1[i] = strip.GetPixelColor(i).CalculateBrightness();
     }
     for (uint16_t i = 0; i < effect.pixels; i++) {
-      //int p1 = i - 1; if (p1 < 0) p1 = effect.pixels - 1;
-      //int p2 = i + 1; if (p2 >= effect.pixels) p2 = 0;
-      //int value = ((uint16_t)buf1[p1] + (uint16_t)buf1[p2]) / 2;
-      //if (buf2[i] != 0) value = (frame - buf2[i])*2;// else value = 0;
       if (buf2[i] != 0) {
-        //int value = (frame - (uint32_t)buf2[i])*2;
         int value = (micros() - buf2[i]) / 5000;
-        //if (value > MAX_BRIGHTNESS) value = MAX_BRIGHTNESS; if (value < 0) value = 0;
         if (value > effect.brightness) value = effect.brightness; if (value < 0) value = 0;
-        //HsbColor color = HsbColor(effect.hue, 1.0f, value/255.0f);
-        HsbColor color = HsbColor((float)(frame%1000)/1000, effect.saturation, value/255.0f);
-        //HsbColor color = HsbColor((float)random(1000)/1000, effect.saturation, value/255.0f);     
+        HsbColor color;
+        if (effect.variation == VARIATION_SINGLE) 
+          color = HsbColor(effect.hue, effect.saturation, value/255.0f);
+        else
+          color = HsbColor((float)(frame%1000)/1000, effect.saturation, value/255.0f);
         strip.SetPixelColor(i, color);
-        //if (((uint8_t)frame - buf2[i]) > 100) buf2[i] = 0;
         if ((micros() - buf2[i]) > 1000000) buf2[i] = 0;
       } else {
         RgbColor color = strip.GetPixelColor(i);
         color.Darken(1);
         strip.SetPixelColor(i, color);
       }
-      //if (value > MAX_BRIGHTNESS) value = MAX_BRIGHTNESS; if (value < 0) value = 0;
-      //HsbColor color = HsbColor(effect.hue, 1.0f, value/255.0f);
-      //HsbColor color = HsbColor(effect.hue, 1.0f, value/255.0f);      
-      //HsbColor color = HsbColor(0.0f, 0.0f, (value/255.0f)*(effect.brightness/255.0f));
-      //HslColor color = HslColor(0.0f, 1.0f, 0.5f);
-      //strip.SetPixelColor(i, color);
     }
-    if (effect.speed < 1) effect.speed = 1;
-    uint8_t new_blink = frame%(50/(uint32_t)effect.speed);
-    //int new_blink = frame%100;
+    if (effect.periods < 1) effect.periods = 1;
+    uint8_t new_blink = frame%(50/(uint32_t)effect.periods);
     if (new_blink == 0) {
       int p;
       do {
         p = random(effect.pixels);
-      //} while (buf2[p] != 0);
       } while (strip.GetPixelColor(p).CalculateBrightness() != 0);
       buf2[p] = micros();
     }
@@ -302,11 +296,13 @@ void processCommand(uint32_t cmd) {
       break;
     case RESET_BTN:
       effect.mode = MODE_RAINBOW;
+      effect.pixels = MAX_PIXELS;
       effect.speed = 1.0f;
       effect.periods = 1.0f;
       effect.phase = 0.0f;
       effect.brightness = MAX_BRIGHTNESS;
       effect.saturation = 1.0f;
+      effect.variation = VARIATION_SINGLE;
       power = 1;
       debug("RESET_BTN");
       break;
@@ -347,25 +343,19 @@ void processCommand(uint32_t cmd) {
       break;
     case FLASH_BTN:
       effect.mode = MODE_BLINK;
-      /*HslColor color = HslColor(0.0f, 0.0f, 0.5f);
-      strip.SetPixelColor(random(effect.pixels), color);
-      strip.Show();*/
       debug("FLASH_BTN");
       break;
     case FILL_BTN:
       effect.mode = MODE_FILL;
-      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
       debug("FILL_BTN");
       break;
-    case COLOR_LEFT_BTN:
+    case HUE_LEFT_BTN:
       effect.hue -= 0.05;
-      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
-      debug("COLOR_LEFT_BTN");
+      debug("HUE_LEFT_BTN");
       break;
-    case COLOR_RIGHT_BTN:
+    case HUE_RIGHT_BTN:
       effect.hue += 0.05;
-      //clearStrip(HslColor(effect.hue, 1.0f, effect.brightness));
-      debug("COLOR_RIGHT_BTN");
+      debug("HUE_RIGHT_BTN");
       break;
     case TRAVELLER_BTN:
       effect.mode = MODE_TRAVELLER;
@@ -374,7 +364,6 @@ void processCommand(uint32_t cmd) {
     case GLITTER_BTN:
       effect.mode = MODE_GLITTER;
       clearStrip();
-      //for (int i = 0; i < MAX_PIXELS; i++) { buf1[i] = 0; buf2[i] = 0; }
       debug("GLITTER_BTN");
       break;
     case ZERO_SATURATION_BTN:
@@ -392,6 +381,14 @@ void processCommand(uint32_t cmd) {
     case FULL_SATURATION_BTN:
       effect.saturation = 1.0f;
       debug("FULL_SATURATION_BTN");
+      break;
+    case VARIATION_LEFT_BTN:
+      effect.variation = VARIATION_SINGLE;
+      debug("VARIATION_LEFT_BTN");
+      break;
+    case VARIATION_RIGHT_BTN:
+      effect.variation = VARIATION_RAINBOW;
+      debug("VARIATION_RIGHT_BTN");
       break;
   }
   ensureEffectSanity();
