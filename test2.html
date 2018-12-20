@@ -13,8 +13,8 @@
 		position = new Array(100).fill(0.0);
 		//for (var c = 0; c < 100; c++) { velocity[c] = 0.0;
 		var id = setInterval(update, 20);
-		var id2 = setInterval(droplet, 1000);
-		//var id2 = setInterval(droplet, 100);
+		//var id2 = setInterval(droplet, 1000);
+		var id2 = setInterval(droplet, 100);
 		var frame = 0;
 		var d = false;
 	  
@@ -35,14 +35,14 @@
 				//v = Math.floor(buffer[c]);
 				v = 0;
 				var color = 'rgb(' + v + ', ' + v + ', ' + v + ')';
-				circle(c * 10 + 5, 100-position[c], 3, color);
+				circle(c * 10 + 5, 190-position[c], 3, color);
 				//circle(c * 10 + 5, 100, 3, color);
 			}
 		}
 		
 		function draw2() {
 			for (var c = 0; c < 100; c++) {
-				var v = Math.floor(position[c]*10);
+				var v = Math.floor(position[c]*50);
 				if (v > 255) {
 					r = v - 255; g = v - 255; b = 255;
 				} else {
@@ -55,7 +55,7 @@
 		}
 		function update() {
 			for (var c = 0; c < 100; c++) {
-				if (t[c] != 0) if (Date.now() - t[c] > 1000) {
+				if (t[c] != 0) if (Date.now() - t[c] > 500) {
 					t[c] = 0;
 				}
 			}
@@ -65,8 +65,8 @@
 				if (c == 0) p1 = 100 - 1; else p1 = c - 1;
 				if (c == 99) p2 = 0; else p2 = c + 1;
 				//v = (position[p1] + position[p2] + position[c]) / 3;
-				v = position[c] / 2 + ((position[p1] + position[p2]) / 4);
-				if (t[c] != 0) v = (Date.now() - t[c]) / 10;
+				v = position[c] / 1.1 + ((position[p1] + position[p2]) / 50);
+				if (t[c] != 0) v = (Date.now() - t[c]) / 5;
 				dest[c] = v;
 			}
 			for (var c = 0; c < 100; c++) position[c] = dest[c];
@@ -74,7 +74,6 @@
 			draw();
 			draw2();
 			frame++;
-			//document.getElementById("demo").innerHTML = position;
 		}
 		
 		function droplet() {
