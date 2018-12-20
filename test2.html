@@ -1,0 +1,88 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+</head>
+<body>
+  <p id="demo"></p>
+
+    <canvas id="myCanvas" width="1100" height="200"></canvas>
+    <script>
+		var canvas = document.getElementById('myCanvas');
+		var context = canvas.getContext('2d');
+		t = new Array(100).fill(0);
+		position = new Array(100).fill(0.0);
+		//for (var c = 0; c < 100; c++) { velocity[c] = 0.0;
+		var id = setInterval(update, 20);
+		var id2 = setInterval(droplet, 1000);
+		//var id2 = setInterval(droplet, 100);
+		var frame = 0;
+		var d = false;
+	  
+		function circle(x, y, s, c) {
+			context.beginPath();
+			context.arc(x, y, s, 0, 2 * Math.PI, false);
+			context.fillStyle = c;
+			context.fill();
+			//context.lineWidth = 5;
+			//context.strokeStyle = '#003300';
+			//context.stroke();
+			//document.write(c);
+		}
+		
+		function draw() {
+			for (var c = 0; c < 100; c++) {
+				//var color = 'rgb(' + Math.floor(c*3) + ', 0, 0)';
+				//v = Math.floor(buffer[c]);
+				v = 0;
+				var color = 'rgb(' + v + ', ' + v + ', ' + v + ')';
+				circle(c * 10 + 5, 100-position[c], 3, color);
+				//circle(c * 10 + 5, 100, 3, color);
+			}
+		}
+		
+		function draw2() {
+			for (var c = 0; c < 100; c++) {
+				var v = Math.floor(position[c]*10);
+				if (v > 255) {
+					r = v - 255; g = v - 255; b = 255;
+				} else {
+					r = 0; g = 0; b = v;
+				}
+				var color = 'rgb(' + r + ', ' + g + ', ' + b + ')';
+				circle(c * 10 + 5, 10, 3, color);
+				//circle(c * 10 + 5, 100, 3, color);
+			}
+		}
+		function update() {
+			for (var c = 0; c < 100; c++) {
+				if (t[c] != 0) if (Date.now() - t[c] > 1000) {
+					t[c] = 0;
+				}
+			}
+		    dest = new Array(100);
+			for (var c = 0; c < 100; c++) {
+				var v;
+				if (c == 0) p1 = 100 - 1; else p1 = c - 1;
+				if (c == 99) p2 = 0; else p2 = c + 1;
+				//v = (position[p1] + position[p2] + position[c]) / 3;
+				v = position[c] / 2 + ((position[p1] + position[p2]) / 4);
+				if (t[c] != 0) v = (Date.now() - t[c]) / 10;
+				dest[c] = v;
+			}
+			for (var c = 0; c < 100; c++) position[c] = dest[c];
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			draw();
+			draw2();
+			frame++;
+			//document.getElementById("demo").innerHTML = position;
+		}
+		
+		function droplet() {
+			var p = Math.floor(Math.random()*100);
+			t[p] = Date.now();
+		}
+    </script>
+
+  
+</body>
+</html>
