@@ -18,6 +18,7 @@ const uint8_t PixelPin = 2;
 #define MAX_BRIGHTNESS 128
 
 //#define DEBUG
+#undef DEBUG
 
 #ifdef DEBUG
 #define DEBUG_MSG(x) Serial.println(x)
