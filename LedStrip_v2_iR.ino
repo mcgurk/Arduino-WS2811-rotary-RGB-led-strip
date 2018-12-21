@@ -49,7 +49,7 @@ const uint8_t PixelPin = 2;
 #define VARIATION_LEFT_BTN 0xFF32CD // <*
 #define VARIATION_RIGHT_BTN 0xFF20DF // *>
 
-uint16_t maxchars;
+//uint16_t maxchars;
 uint32_t frame;
 uint8_t fading = 1;
 uint8_t power = 1;
@@ -98,6 +98,11 @@ uint8_t buf1[MAX_PIXELS];
 uint32_t buf2[MAX_PIXELS];
 
 void ensureEffectSanity() {
+  if (isnan(effect.speed)) effect.speed = 0.0f;
+  if (isnan(effect.periods)) effect.periods = 0.0f;
+  if (isnan(effect.hue)) effect.hue = 0.0f;
+  if (isnan(effect.saturation)) effect.saturation = 0.0f;
+  if (isnan(effect.phase)) effect.phase = 0.0f;
   if (effect.pixels > MAX_PIXELS) effect.pixels = MAX_PIXELS;
   if (effect.pixels < 4) effect.pixels = 4;
   if (effect.mode > BIGGEST_MODE_NUMBER) effect.mode = 1;
@@ -107,7 +112,7 @@ void ensureEffectSanity() {
   effect.hue = fmod(effect.hue, 1.0f); if (effect.hue < 0.0f) effect.hue = 1.0f - effect.hue;
   if (effect.saturation < 0) effect.saturation = 0; if (effect.saturation > 1.0f) effect.saturation = 1.0f;
   if (effect.fading != 1) effect.fading = 0;
-  maxchars = effect.pixels*3;
+  //maxchars = effect.pixels*3;
 }
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
@@ -210,7 +215,7 @@ void loop() {
     if (effect.variation == VARIATION_SINGLE)
       color = HslColor(effect.hue, effect.saturation, effect.brightness/255.0f);
     else
-      color = HslColor((float)(frame%1000)/1000, effect.saturation, effect.brightness/255.0f);
+      color = HslColor((float)(frame%250)/250, effect.saturation, effect.brightness/255.0f);
     strip.SetPixelColor(p, color);
     if (irrecv.isIdle()) strip.Show();
   }
@@ -291,12 +296,13 @@ void processCommand(uint32_t cmd) {
     case RESET_BTN:
       effect.mode = MODE_RAINBOW;
       effect.pixels = MAX_PIXELS;
-      effect.speed = 1.0f;
+      effect.speed = 2.0f;
       effect.periods = 1.0f;
       effect.phase = 0.0f;
       effect.brightness = MAX_BRIGHTNESS;
       effect.saturation = 1.0f;
       effect.variation = VARIATION_SINGLE;
+      effect.hue = 0;
       power = 1;
       DEBUG_MSG("RESET_BTN");
       break;
@@ -386,7 +392,7 @@ void processCommand(uint32_t cmd) {
       break;
   }
   ensureEffectSanity();
-  //printStatus();
+  printStatus();
 }
 
 
@@ -415,13 +421,13 @@ uint16_t handleFading() {
 void pollSerial() {
   if (!Serial.available()) return;
   if (Serial.peek() == 'b') {
-    Serial.read(); //throw 'b' away
+  /*  Serial.read(); //throw 'b' away
     effect.mode = MODE_BINARY;
     char *ptr = (char*)strip.Pixels();
     uint16_t cnt = Serial.readBytes(ptr, maxchars);
     strip.Dirty();
     strip.Show();
-  } else {
+  } else {*/
     /*DynamicJsonBuffer jsonBuffer(255); //ArduinoJson 5
     JsonObject& root = jsonBuffer.parseObject(Serial);
     parseStripParameters(root);*/
@@ -539,6 +545,9 @@ void printStatus() {
   Serial.print("speed:"); Serial.println(effect.speed);
   Serial.print("periods:"); Serial.println(effect.periods);
   Serial.print("fading:"); Serial.println(effect.fading);
+  Serial.print("hue:"); Serial.println(effect.hue);
+  Serial.print("saturation:"); Serial.println(effect.saturation);
+  Serial.print("variation:"); Serial.println(effect.variation);
   Serial.print("frame:"); Serial.println(frame);
 }
   
