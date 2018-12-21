@@ -7,9 +7,9 @@
 #include <EEPROM.h>
 #include <IRremote.h>
 
-#define recvPin 8
-#define GND 9
-#define VCC 10
+#define recvPin 3
+#define GND 4
+#define VCC 5
 IRrecv irrecv(recvPin);
 
 const uint8_t PixelPin = 2;
@@ -17,7 +17,8 @@ const uint8_t PixelPin = 2;
 #define MAX_PIXELS 100
 #define MAX_BRIGHTNESS 128
 
-#define DEBUG
+//#define DEBUG
+
 #ifdef DEBUG
 #define debug(x) Serial.println(x)
 #else
@@ -717,4 +718,3 @@ hello world
 bc614e
 4e 
 */
-
