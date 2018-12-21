@@ -20,9 +20,9 @@ const uint8_t PixelPin = 2;
 //#define DEBUG
 
 #ifdef DEBUG
-#define debug(x) Serial.println(x)
+#define DEBUG_MSG(x) Serial.println(x)
 #else
-#define debug(x)
+#define DEBUG_MSG(x)
 #endif
 
 #define POWER_BTN 0xFFB04F // power (red)
@@ -109,15 +109,8 @@ void ensureEffectSanity() {
   maxchars = effect.pixels*3;
 }
 
-#ifdef DEBUG
-#define DBG_MSG(msg) Serial.println(msg);
-#else
-#define DBG_MSG(msg)
-#endif
-
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(MAX_PIXELS, PixelPin);
 NeoGamma<NeoGammaEquationMethod> colorGamma;
-
 
 void setup() {
   pinMode(GND, OUTPUT); digitalWrite(GND, LOW);
@@ -131,13 +124,12 @@ void setup() {
 
   Serial.println();
   Serial.println("Initializing...");
-  Serial.flush();
 
   strip.Begin();
 
   Serial.println();
   Serial.println("Running...");
-  DBG_MSG("DEBUG!");
+  DEBUG_MSG("DEBUG!");
 
   EEPROM.get(1024, effect);
   ensureEffectSanity();
@@ -293,7 +285,7 @@ void processCommand(uint32_t cmd) {
     case POWER_BTN:
       power ^= 1;
       if (!power) clearStrip();
-      debug("POWER_BTN");
+      DEBUG_MSG("POWER_BTN");
       break;
     case RESET_BTN:
       effect.mode = MODE_RAINBOW;
@@ -305,91 +297,91 @@ void processCommand(uint32_t cmd) {
       effect.saturation = 1.0f;
       effect.variation = VARIATION_SINGLE;
       power = 1;
-      debug("RESET_BTN");
+      DEBUG_MSG("RESET_BTN");
       break;
     case SPEED_DOWN_BTN:
       effect.speed -= 1.0f;
-      debug("SPEED_DOWN_BTN");
-      debug(effect.speed);
+      DEBUG_MSG("SPEED_DOWN_BTN");
+      DEBUG_MSG(effect.speed);
       break;
     case SPEED_UP_BTN:
       effect.speed += 1.0f;
-      debug("SPEED_UP_BTN");
-      debug(effect.speed);
+      DEBUG_MSG("SPEED_UP_BTN");
+      DEBUG_MSG(effect.speed);
       break;
     case SAVE_BTN:
       EEPROM.put(1024, effect);
-      debug("SAVE_BTN");
+      DEBUG_MSG("SAVE_BTN");
       break;
     case LOAD_BTN:
       EEPROM.get(1024, effect);
       clearStrip();
-      debug("LOAD_BTN");
+      DEBUG_MSG("LOAD_BTN");
       break;
     case WIDE_BTN:
       effect.periods -= 1.0f;
-      debug("WIDE_BTN");
+      DEBUG_MSG("WIDE_BTN");
       break;
     case NARROW_BTN:
       effect.periods += 1.0f;
-      debug("NARROW_BTN");
+      DEBUG_MSG("NARROW_BTN");
       break;
     case BRIGHTNESS_UP_BTN:
       effect.brightness += 10;
-      debug("BRIGHTNESS_UP_BTN");
+      DEBUG_MSG("BRIGHTNESS_UP_BTN");
       break;
     case BRIGHTNESS_DOWN_BTN:
       effect.brightness -= 10;
-      debug("BRIGHTNESS_DOWN_BTN");
+      DEBUG_MSG("BRIGHTNESS_DOWN_BTN");
       break;
     case FLASH_BTN:
       effect.mode = MODE_BLINK;
-      debug("FLASH_BTN");
+      DEBUG_MSG("FLASH_BTN");
       break;
     case FILL_BTN:
       effect.mode = MODE_FILL;
-      debug("FILL_BTN");
+      DEBUG_MSG("FILL_BTN");
       break;
     case HUE_LEFT_BTN:
       effect.hue -= 0.05;
-      debug("HUE_LEFT_BTN");
+      DEBUG_MSG("HUE_LEFT_BTN");
       break;
     case HUE_RIGHT_BTN:
       effect.hue += 0.05;
-      debug("HUE_RIGHT_BTN");
+      DEBUG_MSG("HUE_RIGHT_BTN");
       break;
     case TRAVELLER_BTN:
       effect.mode = MODE_TRAVELLER;
-      debug("TRAVELLER_BTN");
+      DEBUG_MSG("TRAVELLER_BTN");
       break;
     case GLITTER_BTN:
       effect.mode = MODE_GLITTER;
       clearStrip();
-      debug("GLITTER_BTN");
+      DEBUG_MSG("GLITTER_BTN");
       break;
     case ZERO_SATURATION_BTN:
       effect.saturation = 0.0f;
-      debug("ZERO_SATURATION_BTN");
+      DEBUG_MSG("ZERO_SATURATION_BTN");
       break;
     case LOW_SATURATION_BTN:
       effect.saturation = 0.4f;
-      debug("LOW_SATURATION_BTN");
+      DEBUG_MSG("LOW_SATURATION_BTN");
       break;
     case HIGH_SATURATION_BTN:
       effect.saturation = 0.8f;
-      debug("HIGH_SATURATION_BTN");
+      DEBUG_MSG("HIGH_SATURATION_BTN");
       break;
     case FULL_SATURATION_BTN:
       effect.saturation = 1.0f;
-      debug("FULL_SATURATION_BTN");
+      DEBUG_MSG("FULL_SATURATION_BTN");
       break;
     case VARIATION_LEFT_BTN:
       effect.variation = VARIATION_SINGLE;
-      debug("VARIATION_LEFT_BTN");
+      DEBUG_MSG("VARIATION_LEFT_BTN");
       break;
     case VARIATION_RIGHT_BTN:
       effect.variation = VARIATION_RAINBOW;
-      debug("VARIATION_RIGHT_BTN");
+      DEBUG_MSG("VARIATION_RIGHT_BTN");
       break;
   }
   ensureEffectSanity();
