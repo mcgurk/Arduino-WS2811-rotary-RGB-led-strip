@@ -109,7 +109,11 @@
             
             'void main(void) {' +
                //' gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);' +
-               ' gl_FragColor = vec4(fragColor, 1.0);' +
+               //' gl_FragColor = vec4(inversesqrt(fragColor), 1.0);' +
+               ' vec3 c = fragColor;' +
+               //' c = c*c;' +
+               ' c = pow(c, vec3(2.0, 2.0, 2.0));' +
+               ' gl_FragColor = vec4(c, 1.0);' +
             '}';
             
          // Create fragment shader object
@@ -161,12 +165,10 @@
             gl.clear(gl.COLOR_BUFFER_BIT);
             // Set the view port
             gl.viewport(0,0,canvas.width,canvas.height);
-
-         setInterval(function() {
-            // Draw the triangle
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, num_pixels*2, gl.UNSIGNED_SHORT, 0);
-            //gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3, gl.UNSIGNED_SHORT, 0);
+            requestAnimationFrame(newFrame);
             
+         //setInterval(function() {
+         function newFrame() {
             //var m = Date.now() % (31416/2);
             //m /= 1000;
             var m = Date.now() / 1000;
@@ -184,7 +186,12 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, color_buffer);
             //gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(colors));
-         }, 50);
+            // Draw the triangle
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, num_pixels*2, gl.UNSIGNED_SHORT, 0);
+            //gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3, gl.UNSIGNED_SHORT, 0);
+            requestAnimationFrame(newFrame);
+         }
+         //}, 50);
 
       </script>
 
