@@ -1,4 +1,5 @@
 ## Schematics
+- Wemos D1 (ESP8266, 4MB)
 - 24 WS2812 RGB led ring
 - 5V -> VCC
 - D2 (GPIO4) -> Data
