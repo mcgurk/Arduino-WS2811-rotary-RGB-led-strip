@@ -21,19 +21,19 @@ esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
 
 ## Windows subsystem for Linux / rshell:
+- https://github.com/dhylands/rshell
+- https://github.com/Microsoft/WSL/issues/3668
 ```
 sudo adduser "$USER" dialout
 sudo apt update
-sudo apt install screen minicom
-screen /dev/ttyS6 115200
-minicom -D /dev/ttyS6
+(sudo apt install screen minicom)
+(screen /dev/ttyS6 115200)
+(minicom -D /dev/ttyS6)
 sudo apt install python3 python3-pip
-https://github.com/dhylands/rshell
 sudo pip3 install rshell
 don't work:
 rshell -p /dev/ttyS6
 in rshell this works:
 connect serial /dev/ttyS6
-(https://github.com/Microsoft/WSL/issues/3668)
 ```
 
