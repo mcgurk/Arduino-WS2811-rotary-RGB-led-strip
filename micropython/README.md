@@ -1,3 +1,11 @@
+## Schematics
+- 24 WS2812 RGB led ring
+- 5V -> VCC
+- D2 (GPIO4) -> Data
+- GND -> GND
+- D5 (GPIO14) -> Button
+- D6 (GPIO12) -> Button
+
 ## Flashing
 - http://micropython.org/download
 - http://micropython.org/resources/firmware/esp8266-20180511-v1.9.4.bin
