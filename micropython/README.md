@@ -50,4 +50,4 @@ rshell -p /dev/ttyS6
 in rshell this works:
 connect serial /dev/ttyS6
 ```
-Ctrl-x leaves program running but exists from rshell.
+`Ctrl-x` leaves program running but exists from REPL.
