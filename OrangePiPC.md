@@ -14,7 +14,7 @@ param_spidev_max_freq=100000000
 ```
 
 - https://i.stack.imgur.com/lzt4s.png
-- SPI0 MOSI = 19 (PC0) (data output from master)
+- SPI0 MOSI = Pin10, GPIO 19 (PC0) (data output from master)
 
 ```
 /etc/udev/rules.d/50-spi.rules:
