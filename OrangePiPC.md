@@ -78,6 +78,18 @@ ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 ## Audio
 - https://www.swharden.com/wp/2016-07-19-realtime-audio-visualization-in-python/
 - https://www.programcreek.com/python/example/52624/pyaudio.PyAudio
+
+```
+amixer set Mic1 cap
+amixer set 'Mic1 Boost' 100
+amixer set 'ADC Gain' 100
+```
+
+Test:
+```
+arecord -vv /dev/null
+```
+
 ```
 sudo apt install portaudio19-dev
 sudo pip3 install pyaudio
