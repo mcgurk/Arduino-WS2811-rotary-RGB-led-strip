@@ -20,7 +20,7 @@ esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
 
-## Windows subsystem for Linux:
+## Windows subsystem for Linux / rshell:
 ```
 sudo adduser "$USER" dialout
 sudo apt update
