@@ -5,7 +5,7 @@
 - D2 (GPIO4) -> Data
 - GND -> GND
 - D5 (GPIO14) -> Button (input, pullup)
-- D6 (GPIO12) -> Button (gnd)
+- D6 (GPIO12) -> Button ("gnd")
 
 ## Flashing
 - http://micropython.org/download
