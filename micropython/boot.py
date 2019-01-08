@@ -1,3 +1,7 @@
+def dir():
+  import os
+  print(os.listdir())
+
 def reset():
   import machine
   machine.reset()
