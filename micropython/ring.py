@@ -19,4 +19,4 @@ while True:
   c = (0,0,0) if pin.value() else hsv_to_rgb(t, 1, 0.25)
   for x in range(24): np[x] = c
   np.write()
-  time.sleep(0.02)
+  time.sleep(0.01)
