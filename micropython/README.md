@@ -7,6 +7,9 @@
 - D5 (GPIO14) -> Button (input, pullup)
 - D6 (GPIO12) -> Button ("gnd")
 
+## hsv_to_rgb
+https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
+
 ## Flashing
 - http://micropython.org/download
 - http://micropython.org/resources/firmware/esp8266-20180511-v1.9.4.bin
