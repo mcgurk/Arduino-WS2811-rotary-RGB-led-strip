@@ -30,6 +30,10 @@ then save that variable into the target file with
 open('target.py','w') as f: f.write(code)
 ```
 
+## "Soft reset"
+`Ctrl-d`
+Cleans memory, loads boot.py and main.py
+
 ## Windows subsystem for Linux / rshell:
 - https://github.com/dhylands/rshell
 - https://github.com/Microsoft/WSL/issues/3668
@@ -46,4 +50,4 @@ rshell -p /dev/ttyS6
 in rshell this works:
 connect serial /dev/ttyS6
 ```
-
+Ctrl-x leaves program running but exists from rshell.
