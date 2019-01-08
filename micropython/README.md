@@ -19,6 +19,16 @@ pip3 install esptool
 esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
+## Pastemode
+```
+ctrl-E
+code=r'''(paste)'''
+ctrl-D
+```
+then save that variable into the target file with 
+```
+open('target.py','w') as f: f.write(code)
+```
 
 ## Windows subsystem for Linux / rshell:
 - https://github.com/dhylands/rshell
