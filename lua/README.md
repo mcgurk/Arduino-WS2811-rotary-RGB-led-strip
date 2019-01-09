@@ -143,3 +143,19 @@ Script: .lua, Compiled: .lc
 
 http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.html
 
+### Commands
+- https://iotbytes.wordpress.com/managing-files-with-nodemcu/
+- https://nodemcu.readthedocs.io/en/master/en/modules/file/
+```
+-- cat("filename"):
+function cat(filename) file.open(filename, "r") print(file.read()) file.close() end
+
+-- ls():
+ls = function() for k,v in pairs(file.list()) do print("name:"..k..", size:"..v) end end
+
+-- df():
+df = function() local r, u, t = file.fsinfo() print("\nFile system info:\nTotal : "..t.."\nUsed : "..u.."\nRemain: "..r.."\n") end
+
+-- dir():
+dir = function() ls() df() end
+```
