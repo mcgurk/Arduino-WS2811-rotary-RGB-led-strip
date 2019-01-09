@@ -30,12 +30,15 @@ def loadconfig(default = {}):
 def setup():
   newconfig = loadconfig()
   for key in default_config:
-    value = input("Give "+key+" ["+str(default_config[key])+"]: ")
-    if value != '':
-      try:
-        newconfig[key] = float(value)
-      except(ValueError):
-        print("Must be number. Use point (.) as decimal separator")
+    while True:
+      value = input("Give "+key+" ["+str(default_config[key])+"]: ")
+      if value != '':
+        try:
+          newconfig[key] = float(value)
+        except(ValueError):
+          print("Must be number. Use point (.) as decimal separator.")
+          continue
+        break
   try:
     print("trying to save config:", newconfig)
     file = open("config.json", "w")
