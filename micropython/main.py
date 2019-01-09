@@ -29,11 +29,9 @@ def loadconfig(default = {}):
 
 def setup():
   newconfig = loadconfig()
-  print("0 = delete value from config.json")
   for key in default_config:
     value = input("Give "+key+" ["+str(default_config[key])+"]: ")
-    if value == '0': del(newconfig[key])
-    if value != '0' and value != '':
+    if value != '':
       try:
         newconfig[key] = float(value)
       except(ValueError):
