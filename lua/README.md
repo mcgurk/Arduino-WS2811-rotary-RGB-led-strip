@@ -4,8 +4,8 @@
 - 5V -> VCC
 - D4 (GPIO2, blue led, must be high during bootup) -> Data
 - GND -> GND
-- D5 (GPIO14) -> Button (input, pullup)
-- D6 (GPIO12) -> Button ("gnd")
+- D5 (GPIO14) -> Button ("gnd")
+- D6 (GPIO12) -> Button (input, pullup)
 
 https://nodemcu.readthedocs.io/en/master/en/modules/ws2812/
 
