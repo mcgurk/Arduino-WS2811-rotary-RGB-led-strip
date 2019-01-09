@@ -9,8 +9,8 @@
 
 ## hsv_to_rgb
 https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
-- input scale: 1.0, 1.0, 1.0
-- output scale: 255, 255, 255
+- input scale: 1.0, 1.0, 1.0 (float)
+- output scale: 255, 255, 255 (int)
 ```
 def hsv_to_rgb(h, s, v):
   if s == 0.0: v*=255; return (v, v, v)
