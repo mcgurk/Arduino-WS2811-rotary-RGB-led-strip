@@ -30,20 +30,14 @@ def loadconfig(default = {}):
 def setup():
   newconfig = loadconfig()
   print("0 = delete value from config.json")
-  brightness = input("Give brightness: ")
-  speed = input("Give speed: ")
-  if brightness == '0': del(newconfig['brightness'])
-  if speed == '0': del(newconfig['speed'])
-  if brightness != '0' and brightness != '':
-    try:
-      newconfig['brightness'] = float(brightness)
-    except(ValueError):
-      print("Must be numbers. Use point (.) as decimal separator")
-  if speed != '0' and speed != '':
-    try:
-      newconfig['speed'] = float(speed)
-    except(ValueError):
-      print("Must be numbers. Use point (.) as decimal separator")
+  for key in default_config:
+    value = input("Give "+key+" ["+str(default_config[key])+"]: ")
+    if value == '0': del(newconfig[key])
+    if value != '0' and value != '':
+      try:
+        newconfig[key] = float(value)
+      except(ValueError):
+        print("Must be numbers. Use point (.) as decimal separator")
   try:
     print("trying to save config:", newconfig)
     file = open("config.json", "w")
