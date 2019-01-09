@@ -1,5 +1,5 @@
 import machine, time, neopixel, sys, json
-print("-- WS2812 LED String lightpainting system by McGurk --")
+print("--- WS2812 LED String lightpainting system by McGurk ---")
 
 default_config = {'speed':4000, 'brightness':0.25, 'sleep':0.01}
 
