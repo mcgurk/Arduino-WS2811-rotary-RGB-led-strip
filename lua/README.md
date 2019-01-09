@@ -2,7 +2,7 @@
 - Wemos D1 (ESP8266, 4MB)
 - 24 WS2812 RGB led ring
 - 5V -> VCC
-- D4 (GPIO2) -> Data
+- D4 (GPIO2, blue led, must be high during bootup) -> Data
 - GND -> GND
 - D5 (GPIO14) -> Button (input, pullup)
 - D6 (GPIO12) -> Button ("gnd")
