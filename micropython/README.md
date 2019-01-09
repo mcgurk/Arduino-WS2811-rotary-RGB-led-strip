@@ -22,6 +22,8 @@ sudo pip3 install esptool
 esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
+(in WSL only baud 115200 works)
+
 ## Pastemode
 ```
 ctrl-E
