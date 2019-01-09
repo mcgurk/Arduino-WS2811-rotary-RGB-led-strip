@@ -50,6 +50,7 @@ sudo apt install python3 python3-pip
 sudo pip3 install rshell
 don't work:
 rshell -p /dev/ttyS6
+rshell -p /dev/ttyS6 cp main.py /pyboard
 in rshell this works:
 connect serial /dev/ttyS6
 ```
