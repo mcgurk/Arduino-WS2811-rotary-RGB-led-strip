@@ -1,3 +1,5 @@
+https://docs.micropython.org/en/v1.8/esp8266/esp8266/tutorial/neopixel.html
+
 ## Schematics
 - Wemos D1 (ESP8266, 4MB)
 - 24 WS2812 RGB led ring
