@@ -18,7 +18,7 @@ https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
 
 did't get to work anything else than esptool.py (Linux/Windows)
 ```
-pip3 install esptool
+sudo pip3 install esptool
 esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
