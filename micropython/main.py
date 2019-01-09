@@ -35,7 +35,7 @@ def setup():
       try:
         newconfig[key] = float(value)
       except(ValueError):
-        print("Must be numbers. Use point (.) as decimal separator")
+        print("Must be number. Use point (.) as decimal separator")
   try:
     print("trying to save config:", newconfig)
     file = open("config.json", "w")
