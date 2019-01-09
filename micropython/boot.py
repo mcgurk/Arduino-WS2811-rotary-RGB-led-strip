@@ -18,3 +18,7 @@ def cat(filename):
       break
     print(data.rstrip("\n"))
   file.close()
+  
+def delete(filename):
+  file = open(filename, "w")
+  file.close()
