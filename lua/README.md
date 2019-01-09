@@ -1,3 +1,16 @@
+## Schematics
+- Wemos D1 (ESP8266, 4MB)
+- 24 WS2812 RGB led ring
+- 5V -> VCC
+- D4 (GPIO2) -> Data
+- GND -> GND
+- D5 (GPIO14) -> Button (input, pullup)
+- D6 (GPIO12) -> Button ("gnd")
+
+https://nodemcu.readthedocs.io/en/master/en/modules/ws2812/
+
+The library uses UART1 routed on GPIO2 (Pin D4 on NodeMCU DEVKIT) to generate the bitstream. It can use UART0 routed to TXD0 as well to handle two led strips at the same time.
+
 ### MQTT
 ```
 mosquitto_pub -u xxxxx -P xxxx -h rasp -d -t ws2811 -m "ON"
