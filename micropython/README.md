@@ -16,13 +16,13 @@ https://stackoverflow.com/questions/24852345/hsv-to-rgb-color-conversion
 - http://docs.micropython.org/en/latest/index.html
 - https://docs.micropython.org/en/latest/reference/constrained.html
 
-did't get to work anything else than esptool.py (Linux/Windows)
+did't get to work anything else than esptool.py (Linux/Windows):
 ```
 sudo pip3 install esptool
 esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
-(in WSL only baud 115200 works)
+(in WSL only 115200baud works)
 
 ## Pastemode
 ```
