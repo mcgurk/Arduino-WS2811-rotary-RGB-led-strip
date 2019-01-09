@@ -71,4 +71,5 @@ rshell -p /dev/ttyS6 cp main.py /pyboard
 in rshell this works:
 connect serial /dev/ttyS6
 ```
-Hint: `Ctrl-x` leaves program running but exists from REPL.
+- Hint: `Ctrl-x` leaves program running but exists from REPL.
+- If you copy-paste bigger chunks, remember that in rshell there is limited buffer.
