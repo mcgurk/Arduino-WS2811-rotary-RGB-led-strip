@@ -39,6 +39,7 @@ def setup():
           print("Must be number. Use point (.) as decimal separator.")
           continue
         break
+      if value == '': break
   try:
     print("trying to save config:", newconfig)
     file = open("config.json", "w")
