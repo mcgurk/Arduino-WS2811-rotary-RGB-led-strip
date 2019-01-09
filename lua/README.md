@@ -148,7 +148,7 @@ http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.ht
 - https://nodemcu.readthedocs.io/en/master/en/modules/file/
 ```
 -- cat("filename"):
-function cat(filename) file.open(filename, "r") print(file.read()) file.close() end
+function cat(filename) file.open(filename) while true do line = file.readline() if (line == nil) then file.close() break end line = string.gsub(line, "[\r\n]", "") print(line) end end
 
 -- ls():
 ls = function() for k,v in pairs(file.list()) do print("name:"..k..", size:"..v) end end
