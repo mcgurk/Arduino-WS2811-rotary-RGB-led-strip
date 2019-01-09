@@ -39,7 +39,9 @@ sudo pip3 install esptool
 esptool.py erase_flash
 esptool.py --baud 460800 write_flash -fm dio 0 esp8266-20180511-v1.9.4.bin
 ```
-(in WSL only 115200baud works)
+- in WSL only 115200baud works
+- ESP32: `esptool.py --baud 460800 write_flash 0x1000 esp32-20181107-v1.9.4-683-gd94aa577a.bin`
+
 
 ## Pastemode
 ```
@@ -51,6 +53,7 @@ then save that variable into the target file with
 ```
 open('target.py','w') as f: f.write(code)
 ```
+Notice that in rshell there is limited buffer size.
 
 ## "Soft reset"
 `Ctrl-d`
