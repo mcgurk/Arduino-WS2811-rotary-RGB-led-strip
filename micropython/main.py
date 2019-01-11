@@ -1,3 +1,5 @@
+# code = '''
+
 import machine, time, neopixel, sys, json
 print("--- WS2812 LED String lightpainting system by McGurk ---")
 
@@ -100,3 +102,5 @@ while True:
   for x in range(np.n): np[x] = c
   np.write()
   time.sleep(config['sleep'])
+
+# with open('main.py','w') as f: f.write(code) '''
