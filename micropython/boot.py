@@ -1,3 +1,5 @@
+# code='''
+
 def ls():
   import os
   print(os.listdir())
@@ -22,3 +24,5 @@ def cat(filename):
 def delete(filename):
   file = open(filename, "w")
   file.close()
+  
+# with open('boot.py','w') as f: f.write(code) '''
