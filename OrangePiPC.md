@@ -13,6 +13,7 @@ param_spidev_spi_bus=0
 param_spidev_max_freq=100000000
 ```
 
+- https://github.com/joosteto/ws2812-spi
 - https://i.stack.imgur.com/lzt4s.png
 - SPI0 MOSI = Pin10, GPIO 19 (PC0) (data output from master)
 
