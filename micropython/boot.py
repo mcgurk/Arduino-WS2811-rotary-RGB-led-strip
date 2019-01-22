@@ -18,7 +18,7 @@ def cat(filename):
     data=file.readline()
     if data=='':
       break
-    print(data.rstrip("\n"))
+    print(data.rstrip("\\n"))
   file.close()
   
 def delete(filename):
