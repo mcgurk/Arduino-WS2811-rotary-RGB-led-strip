@@ -1,5 +1,11 @@
 https://docs.micropython.org/en/v1.8/esp8266/esp8266/tutorial/neopixel.html
 
+## Setup
+
+- Serial connection at 115200baud
+- Ctrl-c to stop main.py
+- setup()
+
 ## Schematics
 - Wemos D1 (ESP8266, 4MB)
 - 24 WS2812 RGB led ring
