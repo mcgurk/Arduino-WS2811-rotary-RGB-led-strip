@@ -52,6 +52,8 @@ import colorsys
 
 LED_COUNT      = 150      # Number of LED pixels.
 LED_BRIGHTNESS = 255      # Set to 0 for darkest and 255 for brightest
+PERIODS = 2
+VELOCITY = 6
 
 strip = Adafruit_NeoPixel(LED_COUNT, 10, 800000, 10, False, LED_BRIGHTNESS, 0)
 strip.begin()
@@ -62,14 +64,15 @@ def gamma(c):
   r = max(min(int(c[0]), 255), 0)
   g = max(min(int(c[1]), 255), 0)
   b = max(min(int(c[2]), 255), 0)
-  return (r, g, b)
+  return (Color(r, g, b))
 
 while True:
-  t = time.time() / 5.0
+  t = time.time() * VELOCITY / 100
+  #t = VELOCITY / (time.time() % 50)
   for i in range(LED_COUNT):
-    h = (i/LED_COUNT + t) % 1.0
-    c = gamma(colorsys.hsv_to_rgb(h, 1, LED_BRIGHTNESS))
-    strip.setPixelColor(i, Color(c[0], c[1], c[2]))
+    h = ((i*PERIODS)/LED_COUNT + t) % 1.0
+    c = gamma(colorsys.hsv_to_rgb(h, 1, BRIGHTNESS))
+    strip.setPixelColor(i, c)
   strip.show()
   time.sleep(0.01)
 #END
