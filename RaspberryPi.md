@@ -1,6 +1,6 @@
 - Enable SPI from Raspberry config
 - If RPi 3, /boot/config.txt: core_freq=250
-- https://github.com/jgarff/rpi_ws281x/wiki
+- https://github.com/jgarff/rpi_ws281x
 
 ```
 sudo apt install scons
