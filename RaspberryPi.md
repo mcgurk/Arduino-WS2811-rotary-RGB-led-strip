@@ -52,7 +52,7 @@ import colorsys
 
 LED_COUNT      = 150      # Number of LED pixels.
 LED_BRIGHTNESS = 255      # Set to 0 for darkest and 255 for brightest
-PERIODS = 2
+PERIODS = 1
 VELOCITY = 6
 
 strip = Adafruit_NeoPixel(LED_COUNT, 10, 800000, 10, False, LED_BRIGHTNESS, 0)
