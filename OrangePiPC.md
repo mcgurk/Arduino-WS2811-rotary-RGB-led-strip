@@ -5,6 +5,7 @@
 - http://www.electrobob.com/ws2812-level-translator/
 - https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/
 - https://hackaday.com/2017/01/20/cheating-at-5v-ws2812-control-to-use-a-3-3v-data-line/
+- Level shifter comparison with scope: https://happyinmotion.com/?p=1247
 
 /boot/armbianEnv.txt:
 ```
