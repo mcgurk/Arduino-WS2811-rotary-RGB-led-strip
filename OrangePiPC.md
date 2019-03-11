@@ -1,5 +1,5 @@
-- Armbian_5.65_Orangepipc_Debian_stretch_next_4.14.78.7z
-- Linux orangepipc 4.14.84-sunxi #3 SMP Sat Dec 1 07:18:41 CET 2018 armv7l GNU/Linux
+- Armbian_5.75_Orangepipc_Debian_stretch_next_4.19.20.7z
+- Linux orangepipc 4.19.20-sunxi #5.75 SMP Sat Feb 9 19:02:47 CET 2019 armv7l GNU/Linux
 
 - http://www.orangepi.org/orangepibbsen//forum.php?mod=viewthread&tid=3318&page=1&extra=#pid21903
 - http://www.electrobob.com/ws2812-level-translator/
@@ -38,7 +38,7 @@ sudo pip3 install spidev
 git clone https://github.com/joosteto/ws2812-spi.git
 cd ws2812-spi
 ```
-
+patch.txt:
 ```
 --- ws2812-spi/ws2812.py        2019-01-08 12:18:06.102975277 +0200
 +++ ws2812-spi_oma/ws2812.py    2019-01-08 10:33:14.162554845 +0200
@@ -66,6 +66,7 @@ cd ws2812-spi
 ```
 
 ```
+patch < patch.txt
 sudo python3 setup.py install
 ```
 
