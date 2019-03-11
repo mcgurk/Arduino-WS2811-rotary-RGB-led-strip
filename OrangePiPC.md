@@ -8,6 +8,7 @@
 
 /boot/armbianEnv.txt:
 ```
+overlay_prefix=sun8i-h3
 overlays=spi-spidev
 param_spidev_spi_bus=0
 param_spidev_max_freq=100000000
@@ -16,7 +17,7 @@ param_spidev_max_freq=100000000
 - https://github.com/joosteto/ws2812-spi
 - https://i.stack.imgur.com/lzt4s.png
 - SPI0 MOSI = 10 (GPIO10/PC0) (physical pin 19) (data output from master)
-
+- (sudo apt install avahi-daemon avahi-discover libnss-mdns)
 ```
 /etc/udev/rules.d/50-spi.rules:
 SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"
