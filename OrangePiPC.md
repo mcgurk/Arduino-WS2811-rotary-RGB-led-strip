@@ -37,6 +37,7 @@ sudo modprobe spidev
 sudo apt install python3-pip python3-setuptools python3-dev python3-wheel python3-numpy
 sudo pip3 install spidev
 git clone https://github.com/joosteto/ws2812-spi.git
+#git clone https://github.com/mcgurk/ws2812-spi.git
 cd ws2812-spi
 ```
 patch.txt:
