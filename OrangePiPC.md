@@ -26,7 +26,7 @@ SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"
 sudo udevadm control --reload-rules
 sudo groupadd spiuser
 sudo adduser "$USER" spiuser
-(muista että groupadd ei tuu voimaan ennen uutta loggausta)
+(remember that groupadd is not effective before new login)
 
 sudo modprobe -r spidev
 sudo modprobe spidev
@@ -135,8 +135,9 @@ arecord -vv /dev/null
 ```
 
 ```
-sudo apt install portaudio19-dev
-sudo pip3 install pyaudio
+sudo apt install python3-pyaudio
+#sudo apt install portaudio19-dev
+#sudo pip3 install pyaudio
 ```
 
 ```
