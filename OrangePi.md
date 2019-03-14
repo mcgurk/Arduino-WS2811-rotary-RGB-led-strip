@@ -110,7 +110,7 @@ import numpy as np
 import spidev
 import ws2812
 spi = spidev.SpiDev()
-spi.open(0,0)
+spi.open(0,0) # If Zero: spi.open(1,0)
 ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 
 CHUNK = 2**11
@@ -181,7 +181,7 @@ import numpy as np
 import signal, sys, time
 import spidev, ws2812, colorsys
 spi = spidev.SpiDev()
-spi.open(0,0)
+spi.open(0,0) # If Zero: spi.open(1,0)
 
 pixels = 50
 
