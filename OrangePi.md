@@ -4,6 +4,13 @@
 - Armbian_5.75_Orangepipc_Debian_stretch_next_4.19.20.7z / Armbian_5.75_Orangepizero_Debian_stretch_next_4.19.20.7z
 - Linux orangepipc 4.19.20-sunxi #5.75 SMP Sat Feb 9 19:02:47 CET 2019 armv7l GNU/Linux
 
+### Preparation/settings
+```
+sudo armbian-config
+```
+- Timezone
+- Wifi
+
 ### Links
 - http://www.orangepi.org/orangepibbsen//forum.php?mod=viewthread&tid=3318&page=1&extra=#pid21903
 - http://www.electrobob.com/ws2812-level-translator/
@@ -12,7 +19,6 @@
 - Level shifter comparison with scope: https://happyinmotion.com/?p=1247
 
 ### Wiring
-
 - https://github.com/joosteto/ws2812-spi
 - Orange Pi PC: https://i.stack.imgur.com/lzt4s.png
 - Orange Pi Zero: https://i.stack.imgur.com/O03j0.jpg
@@ -21,7 +27,6 @@
 - (sudo apt install avahi-daemon avahi-discover libnss-mdns)
 
 ### Enable SPI
-
 /boot/armbianEnv.txt:
 ```
 overlay_prefix=sun8i-h3
@@ -29,22 +34,24 @@ overlays=spi-spidev
 param_spidev_spi_bus=0
 param_spidev_max_freq=100000000
 ```
-
-```
 /etc/udev/rules.d/50-spi.rules:
+```
 SUBSYSTEM=="spidev", GROUP="spiuser", MODE="0660"
-
+```
+```
 sudo udevadm control --reload-rules
 sudo groupadd spiuser
 sudo adduser "$USER" spiuser
+```
 (remember that groupadd is not effective before new login)
 
+Reload module if neened:
+```
 sudo modprobe -r spidev
 sudo modprobe spidev
 ```
 
-### Python
-
+### Python / ws2812-spi -library
 ```
 sudo apt install python3-pip python3-setuptools python3-dev python3-wheel python3-numpy
 sudo pip3 install spidev
