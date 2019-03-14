@@ -10,6 +10,7 @@ sudo armbian-config
 ```
 - Timezone
 - Wifi
+- (sudo apt install avahi-daemon avahi-discover libnss-mdns)
 
 ### Links
 - http://www.orangepi.org/orangepibbsen//forum.php?mod=viewthread&tid=3318&page=1&extra=#pid21903
@@ -24,7 +25,6 @@ sudo armbian-config
 - Orange Pi Zero: https://i.stack.imgur.com/O03j0.jpg
 - Orange Pi PC: SPI0 MOSI = 10 (GPIO10/PC0) (physical pin 19) (data output from master)
 - Orange Pi Zero: SPI1 MOSI = 15 (GPIO15/MOSI) (physical pin 19) (data output from master)
-- (sudo apt install avahi-daemon avahi-discover libnss-mdns)
 
 ### Enable SPI
 /boot/armbianEnv.txt:
