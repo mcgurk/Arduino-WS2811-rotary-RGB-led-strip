@@ -53,8 +53,8 @@ sudo modprobe spidev
 
 #### SPI buffer size
 - Default maximum data size is 4096 bytes (300 leds -> ok, 350 -> doesn't work).
-- Increase (Not tested) https://www.raspberrypi.org/forums/viewtopic.php?t=124472
-Orange Pi:
+- Increase https://www.raspberrypi.org/forums/viewtopic.php?t=124472
+Orange Pi (not tested):
 ```
 modprobe spidev bufsiz=32768
 check:
@@ -62,7 +62,7 @@ cat /sys/module/spidev/parameters/bufsiz
 Hardcoded?
 "linux/spidev.c"  the line 91:"static unsigned bufsiz = 4096;"
 ```
-Python:
+Python (not tested):
 ```
 1. download the py-spidev module as a zip file and extract the contents;
 2. edit the 'spidev_module.c' file. There are four instances of '4096' in the file. Use search and replace to change all four of these to the desired value. Save the file.
