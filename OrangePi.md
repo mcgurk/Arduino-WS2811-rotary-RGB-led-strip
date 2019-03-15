@@ -87,6 +87,7 @@ ws2812.write2812(spi, [[10,0,0], [0,10,0], [0,0,10], [10, 10, 0]])
 - https://www.swharden.com/wp/2016-07-19-realtime-audio-visualization-in-python/
 - https://www.programcreek.com/python/example/52624/pyaudio.PyAudio
 
+Set input volume and gain (settings are saved):
 ```
 amixer set Mic1 cap
 amixer set 'Mic1 Boost' 100
