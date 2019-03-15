@@ -51,6 +51,27 @@ sudo modprobe -r spidev
 sudo modprobe spidev
 ```
 
+#### SPI buffer size
+- Default maximum data size is 4096 bytes (300 leds -> ok, 350 -> doesn't work).
+- Increase (Not tested) https://www.raspberrypi.org/forums/viewtopic.php?t=124472
+Orange Pi:
+```
+modprobe spidev bufsiz=32768
+check:
+cat /sys/module/spidev/parameters/bufsiz
+Hardcoded?
+"linux/spidev.c"  the line 91:"static unsigned bufsiz = 4096;"
+```
+Python:
+```
+1. download the py-spidev module as a zip file and extract the contents;
+2. edit the 'spidev_module.c' file. There are four instances of '4096' in the file. Use search and replace to change all four of these to the desired value. Save the file.
+3. remove the existing spidev module:
+sudo pip uninstall spidev
+4. reinstall spidev using the modified source file:
+sudo python setup.py install
+```
+
 ### Python / ws2812-spi -library
 ```
 sudo apt install python3-pip python3-setuptools python3-dev python3-wheel python3-numpy
