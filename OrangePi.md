@@ -54,6 +54,7 @@ sudo modprobe spidev
 #### SPI buffer size
 - Default maximum data size is 4096 bytes (300 leds -> ok, 350 -> doesn't work).
 - Increase https://www.raspberrypi.org/forums/viewtopic.php?t=124472
+
 Orange Pi (not tested):
 ```
 modprobe spidev bufsiz=32768
