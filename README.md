@@ -9,7 +9,7 @@
 - Databus to pin2
 - 150pcs WS2811 leds with 255 brightness and rainbow-colors takes 5V/3A
 - 150pcs WS2811 leds with 128 brightness and rainbow-colors takes 5V/2A
-- 200 -> 2.7A, 
+- brightness 200 -> 2.7A, brightness 175 -> 2.5A
 - ATmega32u4 SRAM: 2560B (~600 RGB leds)
 - ATmega328p SRAM: 2048B (~? RGB leds)
 - If ArduinoJson or other libraries which needs buffers or uses lot of memory, max. 300 RGB leds could be better choice.
