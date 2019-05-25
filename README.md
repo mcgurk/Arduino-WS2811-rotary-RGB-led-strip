@@ -7,8 +7,8 @@
 - Arduino Pro Micro (Arduino Leonardo selected from Arduino IDE)
 - LED strings: "DC 5V 50PCS WS2811 RGB Full Color 12mm Pixels digital Addressable LED String XD"
 - Databus to pin2
-- 150pcs WS2811 leds with full brightness and rainbow-colors takes 5V/3A
-- 150pcs WS2811 leds with 1/2 brightness and rainbow-colors takes 5V/2A
+- 150pcs WS2811 leds with 255 brightness and rainbow-colors takes 5V/3A
+- 150pcs WS2811 leds with 128 brightness and rainbow-colors takes 5V/2A
 - ATmega32u4 SRAM: 2560B (~600 RGB leds)
 - ATmega328p SRAM: 2048B (~? RGB leds)
 - If ArduinoJson or other libraries which needs buffers or uses lot of memory, max. 300 RGB leds could be better choice.
