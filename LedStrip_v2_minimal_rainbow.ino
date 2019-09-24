@@ -110,7 +110,7 @@ void loop() {
     } \
   } while(0)
 
-void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *r, uint8_t *g , uint8_t *b) {
+void fast_hsv2rgb_32bit(uint16_t h, uint8_t s, uint8_t v, uint8_t *b, uint8_t *r , uint8_t *g) {
   HSV_MONOCHROMATIC_TEST(s, v, r, g, b);  // Exit with grayscale if s == 0
 
   uint8_t sextant = h >> 8;
