@@ -61,9 +61,9 @@ void loop() {
   }
 
   #ifdef GAMMA
-  *ptr = strip.Pixels(); 
+  ptr = strip.Pixels(); 
   for (uint16_t i = 0; i < PIXELS*3; i++) {
-    *ptr++ = gamma_table[*ptr];
+    *ptr++ = pgm_read_byte_near(gamma_table + *ptr);
   }
   #endif
 
