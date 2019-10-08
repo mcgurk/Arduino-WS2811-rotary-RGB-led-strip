@@ -9,6 +9,7 @@
 #define BRIGHTNESS 200
 #define VELOCITY 6.0f
 #define PERIODS 1.0f
+#define MODE 0
 
 #define GAMMA
 
@@ -72,6 +73,7 @@ uint16_t frame = 0;
 float phase = 0;
 uint32_t old_t = 0;
 uint8_t brightness = BRIGHTNESS;
+uint8_t mode = MODE;
 
 NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod> strip(PIXELS, PixelPin);
 
@@ -99,43 +101,49 @@ void setup() {
 #define HSV_VAL_MAX   255
 
 void loop() {
+
   uint16_t hue_moving = phase * HSV_HUE_MAX;
   float hue_mul = HSV_HUE_MAX/(PIXELS/PERIODS);
   uint8_t *ptr;
   ptr = strip.Pixels();
 
-  //uint32_t p1 = (uint32_t)(phase*7000);
-  //uint32_t p2 = (uint32_t)(phase*10000);
-  uint32_t p1 = (uint32_t)(phase*7000); //hue
-  uint32_t p2 = (uint32_t)(phase*15000); //value
+  if (mode == 1) {
+
+    //uint32_t p1 = (uint32_t)(phase*7000);
+    //uint32_t p2 = (uint32_t)(phase*10000);
+    uint32_t p1 = (uint32_t)(phase*7000); //hue
+    uint32_t p2 = (uint32_t)(phase*15000); //value
       
-  for (uint32_t i = 0; i < PIXELS; i++) {
-    #define A 60.0/360.0*HSV_HUE_MAX/255.0
-    #define C 180.0/360.0*HSV_HUE_MAX
-    //uint8_t x1 = -i*255*3/PIXELS+p1;
-    //uint8_t x2 = i*255*4/PIXELS+p2;
-    uint8_t x1 = -i*3+p1;
-    uint8_t x2 = i*4+p2;
-    uint16_t hue = pgm_read_byte_near(sine_table + x1)*A+C;
-    //uint16_t hue = 0;
-    //hue = HSV_HUE_MAX/3*2;
-    uint8_t v = pgm_read_byte_near(sine_table + x2)*brightness/255.0;
-    //fast_hsv2rgb_32bit(hue, 255, v/1.5+50.0, ptr++, ptr++, ptr++);
-    fast_hsv2rgb_32bit(hue, 255, v+50, ptr++, ptr++, ptr++);
+    for (uint32_t i = 0; i < PIXELS; i++) {
+      #define A 60.0/360.0*HSV_HUE_MAX/255.0
+      #define C 180.0/360.0*HSV_HUE_MAX
+      //uint8_t x1 = -i*255*3/PIXELS+p1;
+      //uint8_t x2 = i*255*4/PIXELS+p2;
+      uint8_t x1 = -i*3+p1;
+      uint8_t x2 = i*4+p2;
+      uint16_t hue = pgm_read_byte_near(sine_table + x1)*A+C;
+      //uint16_t hue = 0;
+      //hue = HSV_HUE_MAX/3*2;
+      uint8_t v = pgm_read_byte_near(sine_table + x2)*brightness/255.0;
+      //fast_hsv2rgb_32bit(hue, 255, v/1.5+50.0, ptr++, ptr++, ptr++);
+      fast_hsv2rgb_32bit(hue, 255, v+50, ptr++, ptr++, ptr++);
+    }
+
+    //for (int i = 0; i < 256; i++) Serial.println(sine_table[i]);
+    //for (int i = 0; i < 256; i++) Serial.println(i);
+    //for (int i = 0; i < 256; i++) Serial.println(pgm_read_byte_near(sine_table + i));
   }
 
-  //for (int i = 0; i < 256; i++) Serial.println(sine_table[i]);
-  //for (int i = 0; i < 256; i++) Serial.println(i);
-  //for (int i = 0; i < 256; i++) Serial.println(pgm_read_byte_near(sine_table + i));
- 
-  /*uint16_t hue_moving = phase * HSV_HUE_MAX;
-  float hue_mul = HSV_HUE_MAX/(PIXELS/PERIODS);
-  uint8_t *ptr = strip.Pixels();
-  for (uint16_t i = 0; i < PIXELS; i++) {
-    uint16_t hue_temp = ((float)i)*hue_mul;
-    uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
-    fast_hsv2rgb_32bit(hue, 255, brightness, ptr++, ptr++, ptr++);
-  }*/
+  if (mode == 0) {
+    //uint16_t hue_moving = phase * HSV_HUE_MAX;
+    //float hue_mul = HSV_HUE_MAX/(PIXELS/PERIODS);
+    //uint8_t *ptr = strip.Pixels();
+    for (uint16_t i = 0; i < PIXELS; i++) {
+      uint16_t hue_temp = ((float)i)*hue_mul;
+      uint16_t hue = (hue_temp + hue_moving) % HSV_HUE_MAX;
+      fast_hsv2rgb_32bit(hue, 255, brightness, ptr++, ptr++, ptr++);
+    }
+  }
   
   #ifdef GAMMA
   ptr = strip.Pixels(); 
@@ -159,6 +167,11 @@ void loop() {
   if(a && !b) brightness = BRIGHTNESS; // 7-8
   //Serial.print(a); Serial.print(" "); Serial.print(b); Serial.print(" "); Serial.println(brightness); delay(100);
   //delay(20);
+  uint8_t c = digitalRead(15); uint8_t d = digitalRead(16);
+  if(c && d) mode = MODE; // no jumper
+  if(!c && d) mode = MODE; // 14-15
+  if(c && !d) mode = 1; // 14-16
+
 }
 
 
