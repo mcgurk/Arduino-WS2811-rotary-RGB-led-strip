@@ -1,16 +1,5 @@
 #include <ArduinoJson.h>
-
-//This example code is in the Public Domain (or CC0 licensed, at your option.)
-//By Evandro Copercini - 2018
-//
-//This example creates a bridge between Serial and Classical Bluetooth (SPP)
-//and also demonstrate that SerialBT have the same functionalities of a normal Serial
-
 #include "BluetoothSerial.h"
-
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
 
 BluetoothSerial SerialBT;
 StaticJsonDocument<1024> doc;
@@ -26,7 +15,7 @@ struct Effect {
   uint8_t mode;
   bool onOff;
   uint8_t brightness;
-  //float speed;
+  float speed;
   //float periods;
   //uint8_t fading;
   //RgbColor color;
@@ -64,6 +53,7 @@ void setup() {
   effect.mode = MODE_STATIC;
   effect.onOff = true;
   effect.brightness = 128;
+  effect.speed = 1;
 }
 
 void loop() {
@@ -94,6 +84,7 @@ void loop() {
         //if (digitalRead(LED_BUILTIN)) doc["led"] = "true"; else doc["led"] = "false";
         if (effect.onOff) doc["onOff"] = "true"; else doc["onOff"] = "false";
         doc["brightness"] = effect.brightness;
+        doc["speed"] = effect.speed;
         serializeJson(doc, SerialBT); SerialBT.write('\n');
         break;
       default:
@@ -123,6 +114,7 @@ void parseEffect() {
   IFKEY("brightness") effect.brightness = doc["brightness"];
   IFKEY("onOff") effect.onOff = doc["onOff"];
   IFKEY("mode") effect.mode = doc["mode"];
+  IFKEY("speed") effect.speed = doc["speed"];
 }
 
 void updateEffect() {
@@ -134,7 +126,7 @@ void updateEffect() {
         break;
       case MODE_RAINBOW:
         //updateRainbow();
-        uint8_t a = (millis() >> 1);
+        uint8_t a = ((millis() >> 4) * effect.speed);
         ledcAnalogWrite(LEDC_CHANNEL_0, a);
         break;
     }
