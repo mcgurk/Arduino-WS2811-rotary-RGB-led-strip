@@ -5,8 +5,6 @@
 #define LED_PIN     14
 //#define NUM_LEDS    50
 #define NUM_LEDS    300
-//#define BRIGHTNESS  64
-#define BRIGHTNESS  10
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 CRGB leds[NUM_LEDS];
@@ -25,13 +23,15 @@ String inputStr;
 
 #define MODE_STATIC 1
 #define MODE_RAINBOW 2
+#define MODE_PALETTE 3
 
 struct Effect {
   //uint16_t pixels;
   uint8_t mode;
   bool onOff;
   uint8_t brightness;
-  float speed;
+  int16_t speed;
+  uint8_t hue;
   //float periods;
   //uint8_t fading;
   //RgbColor color;
@@ -48,11 +48,12 @@ void setup() {
   effect.mode = MODE_STATIC;
   effect.onOff = true;
   effect.brightness = 10;
-  effect.speed = 1;
+  effect.speed = 256;
+  effect.hue = 0;
 
   //delay(3000); // power-up safety delay
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.setBrightness(BRIGHTNESS);
+  FastLED.setBrightness(effect.brightness);
   currentPalette = RainbowColors_p;
   currentBlending = LINEARBLEND;
 
@@ -74,17 +75,19 @@ void loop() {
   if (Serial.available()) {
     SerialBT.write(Serial.read());
   }
+  if (SerialBT.hasClient()) {
+    //if(!digitalRead(LED_BUILTIN)) digitalWrite(LED_BUILTIN, HIGH);
+    digitalWrite(LED_BUILTIN, HIGH);
+  } else {
+    //if(digitalRead(LED_BUILTIN)) digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, LOW);
+  }
   if (SerialBT.available()) {
     inputStr = SerialBT.readStringUntil('\n');
     Serial.println(inputStr);
     
-    //char s[100];
-    //S.toCharArray(s, 99);
-    //for (int i=0; i < sizeof(S)+5; i++) { Serial.println(s[i], DEC); }
-    //char c = SerialBT.read();
     const char *s = inputStr.c_str();
     char c = s[0];
-    //Serial.write(c);
     switch (c) {
       case 'a':
         digitalWrite(LED_BUILTIN, HIGH);
@@ -93,10 +96,10 @@ void loop() {
         digitalWrite(LED_BUILTIN, LOW);
         break;
       case '*':
-        //if (digitalRead(LED_BUILTIN)) doc["led"] = "true"; else doc["led"] = "false";
         if (effect.onOff) doc["onOff"] = "true"; else doc["onOff"] = "false";
         doc["brightness"] = effect.brightness;
         doc["speed"] = effect.speed;
+        doc["hue"] = effect.hue;
         serializeJson(doc, SerialBT); SerialBT.write('\n');
         break;
       default:
@@ -106,7 +109,7 @@ void loop() {
   }
 
   if (effect.mode > 1 && effect.onOff == true) updateEffect();
-  //delay(20);
+  //FastLED.delay(1000 / UPDATES_PER_SECOND);
 
 
 }
@@ -129,11 +132,12 @@ void parseEffect() {
   IFKEY("onOff") effect.onOff = doc["onOff"];
   IFKEY("mode") effect.mode = doc["mode"];
   IFKEY("speed") effect.speed = doc["speed"];
+  IFKEY("hue") effect.hue = doc["hue"];
 }
 
 void updateEffect() {
   if (effect.onOff) {
-    digitalWrite(LED_BUILTIN, HIGH);
+    //digitalWrite(LED_BUILTIN, HIGH);
     switch (effect.mode) {
       case MODE_STATIC:
         //ledcAnalogWrite(LEDC_CHANNEL_0, effect.brightness);
@@ -149,20 +153,23 @@ void updateEffect() {
         //static uint8_t hue = 0;
         //FastLED.showColor(CHSV(hue++, 255, 255));
         //FastLED.showColor(CRGB::Green);
-        fill_solid(leds, NUM_LEDS, CRGB(0,0,40));
+        //fill_solid(leds, NUM_LEDS, CRGB(0,0,40));
+        fill_solid(leds, NUM_LEDS, CHSV(effect.hue, 255, 40));
         //fill_rainbow(leds, NUM_LEDS, 0, (uint8_t)(255.0/50.0));
         FastLED.show();
         FastLED.delay(1000 / UPDATES_PER_SECOND);
         break;
       case MODE_RAINBOW:
+        {
         //ChangePalettePeriodically();
-        currentPalette = RainbowColors_p; currentBlending = LINEARBLEND;
+        //currentPalette = RainbowColors_p; currentBlending = LINEARBLEND;
         //static uint8_t startIndex = 0;
         //startIndex = startIndex + 1; // motion speed
         //uint16_t startIndex = ((millis() >> 4) * effect.speed);
         //uint16_t startIndex = (((float)millis()) / 1000.0 * 300.0 * effect.speed);
         //uint16_t startHue = (((float)millis()) / 1000.0 * 255.0 * effect.speed) << 8;
-        uint16_t startHue = (millis() >> 2) * (uint16_t)(effect.speed*256);
+        //uint16_t startHue = (millis() >> 2) * (uint16_t)(effect.speed*256);
+        uint16_t startHue = (millis() >> 2) * effect.speed;
         //uint8_t startHue = millis() >> 7;
         //uint16_t startIndex = (((float)millis()) / 1000.0 * NUM_LEDS * effect.speed);
         //FillLEDsFromPaletteColors(startIndex);
@@ -178,17 +185,25 @@ void updateEffect() {
           //leds[i].setHue(i);
           //leds[i].setHue((uint8_t)((float)i * NUM_LEDS / 255.0) + startHue);
           leds[i].setHue((i * NUM_LEDS + startHue) >> 8);
+          //leds[i].setHSV((i * NUM_LEDS + startHue) >> 8, 255, 4);
         }
         FastLED.show();
-        //delay(100);
         FastLED.delay(1000 / UPDATES_PER_SECOND);
+        //delay(100);
         //updateRainbow();
         //uint8_t a = ((millis() >> 4) * effect.speed);
         //ledcAnalogWrite(LEDC_CHANNEL_0, a);
+        }
+        break;
+      case MODE_PALETTE:
+        currentPalette = CloudColors_p;           
+        currentBlending = LINEARBLEND;
+        uint16_t startIndex = (millis() >> 2) * effect.speed;
+        FillLEDsFromPaletteColors(startIndex);
+        FastLED.show();
+        FastLED.delay(1000 / UPDATES_PER_SECOND);
         break;
     }
-  } else {
-    digitalWrite(LED_BUILTIN, LOW);
   }
 }
 
