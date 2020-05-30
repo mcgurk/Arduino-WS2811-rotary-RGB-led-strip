@@ -29,9 +29,12 @@ struct Effect {
   //uint16_t pixels;
   uint8_t mode;
   bool onOff;
-  uint8_t brightness;
-  int16_t speed;
-  uint8_t hue;
+  uint8_t brightness; //(CSHV minimum 23 without any hue to go black)
+  float speed;
+  float hue;
+  uint32_t lastMillis;
+  float counter;
+  float freq;
   //float periods;
   //uint8_t fading;
   //RgbColor color;
@@ -48,12 +51,15 @@ void setup() {
   effect.mode = MODE_STATIC;
   effect.onOff = true;
   effect.brightness = 10;
-  effect.speed = 256;
+  effect.speed = 1;
   effect.hue = 0;
+  effect.freq = 1;
 
   //delay(3000); // power-up safety delay
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
-  FastLED.setBrightness(effect.brightness);
+  FastLED.setDither(0);
+  //FastLED.setBrightness(255);
+  //FastLED.setBrightness(effect.brightness);
   currentPalette = RainbowColors_p;
   currentBlending = LINEARBLEND;
 
@@ -100,6 +106,7 @@ void loop() {
         doc["brightness"] = effect.brightness;
         doc["speed"] = effect.speed;
         doc["hue"] = effect.hue;
+        doc["freq"] = effect.freq;
         serializeJson(doc, SerialBT); SerialBT.write('\n');
         break;
       default:
@@ -128,78 +135,62 @@ void parseEffect() {
     return;
   }
   IFKEY("brightness") effect.brightness = doc["brightness"];
-  FastLED.setBrightness(effect.brightness);
+  //FastLED.setBrightness(effect.brightness);
   IFKEY("onOff") effect.onOff = doc["onOff"];
   IFKEY("mode") effect.mode = doc["mode"];
   IFKEY("speed") effect.speed = doc["speed"];
   IFKEY("hue") effect.hue = doc["hue"];
+  IFKEY("freq") effect.freq = doc["freq"];
 }
 
 void updateEffect() {
   if (effect.onOff) {
-    //digitalWrite(LED_BUILTIN, HIGH);
+    //uint16_t startIndex = (millis() >> 2) * (uint16_t)(effect.speed*256);
+    //uint16_t startHue = (millis() >> 2) * (uint16_t)(effect.speed*256);
+    float now = millis();
+    float diff = now - effect.lastMillis; effect.lastMillis = now;
+    effect.counter = effect.counter + diff * effect.speed;
+    uint16_t startIndex = effect.counter * NUM_LEDS / 1000.0;
+    uint16_t startHue = effect.counter * NUM_LEDS / 1000.0;
+    //Serial.println(startIndex);
+    //static uint16_t startHue = (millis() >> 2) * (uint16_t)(effect.speed*256);
+    uint8_t hue = effect.hue;
+    uint8_t brightness = effect.brightness;
+    uint16_t freq = effect.freq * 256.0;
     switch (effect.mode) {
       case MODE_STATIC:
-        //ledcAnalogWrite(LEDC_CHANNEL_0, effect.brightness);
-        /*currentPalette = CloudColors_p; currentBlending = LINEARBLEND;
-        FillLEDsFromPaletteColors(0);
-        FastLED.show();*/
-        /*for (int i = 0; i < NUM_LEDS; i++) {
-          leds[i] = CRGB(64, 0, 0);
-        }
-        //FastLED.showColor(CRGB(64, 0, 0));
-        FastLED.setBrightness(effect.brightness);
-        FastLED.show();*/
-        //static uint8_t hue = 0;
-        //FastLED.showColor(CHSV(hue++, 255, 255));
-        //FastLED.showColor(CRGB::Green);
-        //fill_solid(leds, NUM_LEDS, CRGB(0,0,40));
-        fill_solid(leds, NUM_LEDS, CHSV(effect.hue, 255, 40));
+        //Serial.println(brightness);
+        fill_solid(leds, NUM_LEDS, CHSV(hue, 255, brightness));
+        //fill_solid(leds, NUM_LEDS, CHSV(hue, 255, 255));
+        //Serial.println(leds[0][0]);
+        //fadeLightBy(leds, NUM_LEDS, 255-brightness);
+        //fadeToBlackBy(leds, NUM_LEDS, 255-brightness);
+        //Serial.println(leds[0][0]);
         //fill_rainbow(leds, NUM_LEDS, 0, (uint8_t)(255.0/50.0));
         FastLED.show();
         FastLED.delay(1000 / UPDATES_PER_SECOND);
         break;
       case MODE_RAINBOW:
-        {
-        //ChangePalettePeriodically();
-        //currentPalette = RainbowColors_p; currentBlending = LINEARBLEND;
-        //static uint8_t startIndex = 0;
-        //startIndex = startIndex + 1; // motion speed
-        //uint16_t startIndex = ((millis() >> 4) * effect.speed);
-        //uint16_t startIndex = (((float)millis()) / 1000.0 * 300.0 * effect.speed);
-        //uint16_t startHue = (((float)millis()) / 1000.0 * 255.0 * effect.speed) << 8;
-        //uint16_t startHue = (millis() >> 2) * (uint16_t)(effect.speed*256);
-        uint16_t startHue = (millis() >> 2) * effect.speed;
-        //uint8_t startHue = millis() >> 7;
-        //uint16_t startIndex = (((float)millis()) / 1000.0 * NUM_LEDS * effect.speed);
-        //FillLEDsFromPaletteColors(startIndex);
-        //FastLED.setBrightness(effect.brightness);
-        //fill_rainbow(leds, NUM_LEDS, startHue, (uint8_t)(255.0/NUM_LEDS));
-        //fill_rainbow(leds, NUM_LEDS, startHue, 1);
-        //FastLED.clear(leds);
-        for (int i = 0; i < NUM_LEDS; i++) {
+        for (uint16_t i = 0; i < NUM_LEDS; i++) {
         //for (int i = 0; i < 150; i++) {
           //uint8_t hue = startHue + i; //((float)i * NUM_LEDS / 255.0);
           //leds[i] = CHSV(i, 255, 64);
           //leds[i] = CRGB(255, 0, i);
           //leds[i].setHue(i);
           //leds[i].setHue((uint8_t)((float)i * NUM_LEDS / 255.0) + startHue);
-          leds[i].setHue((i * NUM_LEDS + startHue) >> 8);
-          //leds[i].setHSV((i * NUM_LEDS + startHue) >> 8, 255, 4);
+          //leds[i].setHue((i * NUM_LEDS + startHue) >> 8);
+          //leds[i].setHSV((i * NUM_LEDS + startHue) >> 8, 255, brightness);
+          leds[i].setHSV(((i * freq) >> 8) + startHue, 255, brightness);
+          //leds[i].setHSV((i * NUM_LEDS + startHue) >> 8, 255, 40);
         }
         FastLED.show();
         FastLED.delay(1000 / UPDATES_PER_SECOND);
-        //delay(100);
-        //updateRainbow();
-        //uint8_t a = ((millis() >> 4) * effect.speed);
-        //ledcAnalogWrite(LEDC_CHANNEL_0, a);
-        }
         break;
       case MODE_PALETTE:
         currentPalette = CloudColors_p;           
         currentBlending = LINEARBLEND;
-        uint16_t startIndex = (millis() >> 2) * effect.speed;
         FillLEDsFromPaletteColors(startIndex);
+        fadeToBlackBy(leds, NUM_LEDS, 255-brightness);
         FastLED.show();
         FastLED.delay(1000 / UPDATES_PER_SECOND);
         break;
@@ -210,7 +201,7 @@ void updateEffect() {
 // ------------------------------------------------
 // FastLED
 // ------------------------------------------------
-void FillLEDsFromPaletteColors( uint8_t colorIndex)
+void FillLEDsFromPaletteColors(uint8_t colorIndex)
 {
     uint8_t brightness = 255;
     
