@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <FastLED.h>
 #include "BluetoothSerial.h"
 #include <ArduinoJson.h>
@@ -22,12 +23,13 @@ String inputStr;
 
 #define LED_BUILTIN 2
 
+#define HOWMANYMODES 4
 #define MODE_STATIC 1
 #define MODE_RAINBOW 2
 #define MODE_PALETTE 3
 #define MODE_RAIN 4
 
-struct Effect {
+struct {
   //uint16_t pixels;
   uint8_t mode;
   bool onOff;
@@ -51,13 +53,28 @@ void setup() {
   Serial.println("The device started, now you can pair it with bluetooth!");
   pinMode(LED_BUILTIN, OUTPUT);
 
-  effect.mode = MODE_STATIC;
-  effect.onOff = true;
-  effect.brightness = 32;
-  effect.speed = 1;
-  effect.hue = 0;
-  effect.saturation = 255;
-  effect.freq = 1;
+  EEPROM.begin(sizeof(effect));
+  EEPROM.get(0, effect);
+  //EEPROM.end();
+
+  if (effect.mode == 0 || effect.mode > HOWMANYMODES) { // crude "sanity check"
+    effect.mode = MODE_STATIC;
+    effect.onOff = true;
+    effect.brightness = 32;
+    effect.speed = 1;
+    effect.hue = 0;
+    effect.saturation = 255;
+    effect.freq = 1;
+  }
+
+  Serial.println(effect.mode);
+  Serial.println(effect.onOff);
+  Serial.println(effect.brightness);
+  Serial.println(effect.speed);
+  Serial.println(effect.hue);
+  Serial.println(effect.saturation);
+  Serial.println(effect.freq);
+  Serial.print("sizeof(effect): "); Serial.println(sizeof(effect));
 
   //delay(3000); // power-up safety delay
   FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
@@ -68,15 +85,15 @@ void setup() {
 
   updateEffect();
 
-  Serial.println(micros());
+  /*Serial.println(micros());
   for (int c = 0; c < 100; c++) {
     //uint8_t startHue = (((float)millis()) / 1000.0 * 255.0 * effect.speed);
     //fill_rainbow(leds, NUM_LEDS, startHue, (uint8_t)(255.0/50.0));
     //for (int i = 0; i < NUM_LEDS; i++) leds[i].setHue((uint8_t)((float)i * NUM_LEDS / 255.0) + c);
     uint8_t startHue = c << 8;
-    for (uint16_t i = 0; i < NUM_LEDS; i++) leds[i].setHue((i * NUM_LEDS + startHue) >> 8);
+    for (uint16_t i = 0; i < NUM_LEDS; i++) leds[i].setHue((i * NUM_LEDS + startHue) >> 8); // < 10ms
   }
-  Serial.println(micros());
+  Serial.println(micros());*/
   
 }
 
@@ -85,14 +102,13 @@ void loop() {
     SerialBT.write(Serial.read());
   }
   if (SerialBT.hasClient()) {
-    //if(!digitalRead(LED_BUILTIN)) digitalWrite(LED_BUILTIN, HIGH);
     digitalWrite(LED_BUILTIN, HIGH);
   } else {
-    //if(digitalRead(LED_BUILTIN)) digitalWrite(LED_BUILTIN, LOW);
     digitalWrite(LED_BUILTIN, LOW);
   }
   if (SerialBT.available()) {
     inputStr = SerialBT.readStringUntil('\n');
+    Serial.println("Message received from BT");
     Serial.println(inputStr);
     
     const char *s = inputStr.c_str();
@@ -105,12 +121,13 @@ void loop() {
         digitalWrite(LED_BUILTIN, LOW);
         break;
       case '*':
+        doc["mode"] = effect.mode;
         if (effect.onOff) doc["onOff"] = "true"; else doc["onOff"] = "false";
         doc["brightness"] = effect.brightness;
         doc["speed"] = effect.speed;
         doc["hue"] = effect.hue;
-        doc["freq"] = effect.freq;
         doc["saturation"] = effect.saturation;
+        doc["freq"] = effect.freq;
         serializeJson(doc, SerialBT); SerialBT.write('\n');
         break;
       default:
@@ -127,7 +144,7 @@ void loop() {
 
 // https://arduinojson.org/v5/api/jsonobject/containskey/
 #define IFKEY(a) if (doc.containsKey(a))
-#define IF(a,b) IFKEY(a) if (!strcmp(doc[a],b))
+#define IF(a,b) IFKEY(a) if (!strcmp(doc[a],b)) // DON'T USE! Guru Meditation Error: Core  1 panic'ed (LoadProhibited). Exception was unhandled.
 
 void parseEffect() {
   // Deserialize the JSON document
@@ -141,15 +158,35 @@ void parseEffect() {
   IFKEY("brightness") effect.brightness = doc["brightness"];
   //FastLED.setBrightness(effect.brightness);
   IFKEY("onOff") effect.onOff = doc["onOff"];
+  if (!effect.onOff) {
+    fill_solid(leds, NUM_LEDS, CRGB(0, 0, 0));
+    FastLED.show();
+  }
   IFKEY("mode") effect.mode = doc["mode"];
   IFKEY("speed") effect.speed = doc["speed"];
   IFKEY("hue") effect.hue = doc["hue"];
   IFKEY("saturation") effect.saturation = doc["saturation"];
   IFKEY("freq") effect.freq = doc["freq"];
+  /*IF("save", "true") {
+    Serial.println("Saving");
+    //EEPROM.write(0, &effect);
+    //EEPROM.begin(512);
+    //Effect foo;
+    //EEPROM.put(0, effect);
+    //EEPROM.put(0, foo);
+    //EEPROM.commit();
+    //EEPROM.end();
+    //EEPROM.commit();
+  }*/
+  IFKEY("save") {
+    Serial.println("Saving");
+    EEPROM.put(0, effect);
+    EEPROM.commit();
+  }
 }
 
 void updateEffect() {
-  if (effect.onOff) {
+  //if (effect.onOff) {
     float now = millis();
     float diff = now - effect.lastMillis; effect.lastMillis = now;
     effect.counter = effect.counter + diff * effect.speed;
@@ -195,7 +232,7 @@ void updateEffect() {
         //fadeToBlackBy(leds, NUM_LEDS, (effect.speed+3.0)*4.0);
         blur1d(leds, NUM_LEDS, (effect.speed+3.0)*42.0);
         if (random(100) > (100.0-(effect.freq*10.0))) {
-          int16_t x = random(0,NUM_LEDS-2);
+          int16_t x = random(0, NUM_LEDS-2);
           leds[x] = leds[x+1] = CHSV(hue, saturation, brightness);
         }
         FastLED.show();
@@ -203,7 +240,11 @@ void updateEffect() {
         FastLED.delay(1000 / 20);
         break;
     }
-  }
+  /*} else { //off:
+    //clear(leds, NUM_LEDS);
+    fill_solid(leds, NUM_LEDS, CRGB(0, 0, 0));
+    FastLED.show();
+  }*/
 }
 
 // ------------------------------------------------
