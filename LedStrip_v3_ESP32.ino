@@ -132,7 +132,7 @@ void loop() {
         break;
       default:
         parseEffect();
-        updateEffect();
+        //updateEffect();
     }
   }
 
