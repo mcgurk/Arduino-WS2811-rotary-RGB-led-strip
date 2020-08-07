@@ -49,7 +49,7 @@ struct {
 
 void setup() {
   Serial.begin(115200);
-  SerialBT.begin("ESP32test"); //Bluetooth device name
+  SerialBT.begin("Pinjan LED-nauha"); //Bluetooth device name
   Serial.println("The device started, now you can pair it with bluetooth!");
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -83,7 +83,12 @@ void setup() {
   currentPalette = RainbowColors_p;
   currentBlending = LINEARBLEND;
 
-  updateEffect();
+  //updateEffect();
+
+  // off when started:
+  effect.onOff = false;
+  fill_solid(leds, NUM_LEDS, CRGB(0, 0, 0));
+  FastLED.show();
 
   /*Serial.println(micros());
   for (int c = 0; c < 100; c++) {
@@ -132,11 +137,13 @@ void loop() {
         break;
       default:
         parseEffect();
-        //updateEffect();
     }
   }
 
-  if (effect.mode > 1 && effect.onOff == true) updateEffect();
+  //if (effect.mode > 1 && effect.onOff == true) updateEffect();
+  if (effect.onOff == true) updateEffect();
+    else FastLED.delay(1000 / UPDATES_PER_SECOND);
+  //updateEffect();
   //FastLED.delay(1000 / UPDATES_PER_SECOND);
 
 
@@ -167,6 +174,13 @@ void parseEffect() {
   IFKEY("hue") effect.hue = doc["hue"];
   IFKEY("saturation") effect.saturation = doc["saturation"];
   IFKEY("freq") effect.freq = doc["freq"];
+  /*if (effect.mode == MODE_STATIC) {
+    uint8_t hue = effect.hue;
+    uint8_t brightness = effect.brightness;
+    uint8_t saturation = effect.saturation;
+    fill_solid(leds, NUM_LEDS, CHSV(hue, saturation, brightness));
+    FastLED.show();
+  } */
   /*IF("save", "true") {
     Serial.println("Saving");
     //EEPROM.write(0, &effect);
@@ -238,6 +252,9 @@ void updateEffect() {
         FastLED.show();
         //FastLED.delay(1000 / UPDATES_PER_SECOND);
         FastLED.delay(1000 / 20);
+        break;
+      default:
+        FastLED.delay(1000 / UPDATES_PER_SECOND);
         break;
     }
   /*} else { //off:
